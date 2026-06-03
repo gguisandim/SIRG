@@ -1,0 +1,116 @@
+{% extends "relatorios/pdf/base_pdf.html" %}
+
+{% block titulo_pdf %}
+Relatório de Frequência em Reuniões
+{% endblock %}
+
+{% block corpo_pdf %}
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <span>Total de reuniões</span>
+    <strong>{{ total_reunioes }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Presenças</span>
+    <strong>{{ total_presencas }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Ausências</span>
+    <strong>{{ total_ausencias }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Justificadas</span>
+    <strong>{{ total_justificadas }}</strong>
+  </div>
+</div>
+
+<h2>Dados do membro</h2>
+
+<table>
+  <tbody>
+    <tr>
+      <th>Nome</th>
+      <td>{{ current_user.membro.nome if current_user.membro else current_user.nome }}</td>
+    </tr>
+    <tr>
+      <th>E-mail</th>
+      <td>{{ current_user.email }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Histórico de frequência</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Reunião</th>
+      <th>Tipo</th>
+      <th>Local</th>
+      <th>Status</th>
+      <th>Justificativa</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for frequencia in frequencias %}
+      <tr>
+        <td>{{ frequencia.reuniao.data.strftime('%d/%m/%Y') }}</td>
+        <td>{{ frequencia.reuniao.titulo }}</td>
+        <td>{{ frequencia.reuniao.tipo }}</td>
+        <td>{{ frequencia.reuniao.local }}</td>
+
+        <td>
+          {% if frequencia.status == 'presente' %}
+            <span class="badge ok">Presente</span>
+          {% elif frequencia.status in ['justificado', 'justificada'] %}
+            <span class="badge pendente">Justificada</span>
+          {% else %}
+            <span class="badge erro">Ausente</span>
+          {% endif %}
+        </td>
+
+        <td>{{ frequencia.justificativa or '-' }}</td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="6">Nenhuma frequência encontrada.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Justificativas registradas</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Reunião</th>
+      <th>Justificativa</th>
+      <th>Anexo</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for frequencia in frequencias_justificadas %}
+      <tr>
+        <td>{{ frequencia.reuniao.data.strftime('%d/%m/%Y') }}</td>
+        <td>{{ frequencia.reuniao.titulo }}</td>
+        <td>{{ frequencia.justificativa or '-' }}</td>
+        <td>{{ 'Sim' if frequencia.anexo_justificativa else '-' }}</td>
+      </tr>
+    {% else %}
+      <tr>
+        <td colspan="4">Nenhuma justificativa registrada.</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

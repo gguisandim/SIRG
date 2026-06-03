@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Pauta da Reunião</title>
+
+  <style>
+    body {
+      background: #f2f2f2;
+      font-family: "Times New Roman", Times, serif;
+      margin: 0;
+      padding: 40px 0;
+      color: #000;
+    }
+
+    .pagina {
+      width: 794px;
+      min-height: 1123px;
+      background: #fff;
+      margin: 0 auto;
+      padding: 42px 55px;
+      box-sizing: border-box;
+      box-shadow: 0 0 8px rgba(0,0,0,0.15);
+    }
+
+    .topo-logos {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .topo-logos img {
+      max-height: 42px;
+      object-fit: contain;
+    }
+
+    .cabecalho {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 1.15;
+      text-transform: uppercase;
+      margin-bottom: 22px;
+    }
+
+    .linha-oficio {
+      display: flex;
+      justify-content: space-between;
+      font-size: 16px;
+      margin-bottom: 24px;
+    }
+
+    .info {
+      font-size: 16px;
+      line-height: 1.25;
+      margin-bottom: 22px;
+    }
+
+    .assunto {
+      font-size: 16px;
+      line-height: 1.25;
+      margin-bottom: 26px;
+    }
+
+    .saudacao {
+      font-size: 16px;
+      margin-bottom: 22px;
+    }
+
+    .texto {
+      font-size: 16px;
+      line-height: 1.25;
+      text-align: left;
+      margin-bottom: 24px;
+    }
+
+    .pautas {
+      font-size: 16px;
+      line-height: 1.18;
+      margin-top: 0;
+    }
+
+    .pautas p {
+      margin: 0 0 8px 0;
+      text-align: left;
+    }
+
+    .pautas .topico-principal {
+      font-weight: bold;
+      margin-top: 18px;
+      margin-bottom: 2px;
+    }
+
+    .pautas .subtopico {
+      margin-left: 22px;
+      margin-bottom: 12px;
+    }
+
+    .assinatura-label {
+      font-size: 16px;
+      margin-top: 34px;
+      margin-bottom: 58px;
+    }
+
+    .assinatura {
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.2;
+    }
+
+    .assinatura strong {
+      font-style: italic;
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .pagina {
+        box-shadow: none;
+        width: auto;
+        min-height: auto;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="pagina">
+
+    <div class="topo-logos">
+      <img src="{{ url_for('static', filename='img/neb.png') }}" alt="NEB">
+      <img src="{{ url_for('static', filename='img/ufpa.png') }}" alt="UFPA">
+      <img src="{{ url_for('static', filename='img/ppeb.png') }}" alt="PPEB">
+    </div>
+
+    <div class="cabecalho">
+      UNIVERSIDADE FEDERAL DO PARÁ<br>
+      NÚCLEO DE ESTUDOS TRANSDISCIPLINARES EM EDUCAÇÃO BÁSICA<br>
+      PROGRAMA DE PÓS-GRADUAÇÃO EM CURRÍCULO E GESTÃO DA ESCOLA BÁSICA
+    </div>
+
+    <div class="linha-oficio">
+      <div>OFÍCIO Nº {{ reuniao.numero_oficio }}/{{ reuniao.data.year }} - PPEB/NEB</div>
+      <div>Belém, {{ reuniao.data.strftime('%d/%m/%Y') }}.</div>
+    </div>
+
+    <div class="info">
+      <strong>Da:</strong> Coordenação do PPEB<br>
+      <strong>Para:</strong> Membros do Colegiado do PPEB
+    </div>
+
+    <div class="assunto">
+      <strong>Assunto:</strong> {{ reuniao.titulo }} – Convocatória
+    </div>
+
+    <div class="saudacao">
+      Prezados(as) Membros
+    </div>
+
+    <p class="texto">
+      Convocamos a todos/as para {{ reuniao.titulo }} a ser realizada no
+      <strong>dia {{ reuniao.data.strftime('%d/%m/%Y') }}</strong>, às
+      <strong>{{ reuniao.horario.strftime('%Hh') }}</strong>, em
+      {{ reuniao.local }}, para tratar da seguinte pauta:
+    </p>
+
+    <div class="pautas">
+      {% for item in reuniao.pauta.split('\n') %}
+        {% set linha = item.strip() %}
+
+        {% if linha %}
+          {% set pedacos = linha.split('.') %}
+
+          {% if pedacos|length == 2 and pedacos[0].isdigit() %}
+            <p class="topico-principal">{{ linha }}</p>
+
+          {% elif pedacos|length >= 3 and pedacos[0].isdigit() and pedacos[1].isdigit() %}
+            <p class="subtopico">{{ linha }}</p>
+
+          {% else %}
+            <p class="subtopico">{{ linha }}</p>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <div class="assinatura-label">
+      Atenciosamente,
+    </div>
+
+    <div class="assinatura">
+      <strong>Émina Santos</strong><br>
+      Coordenadora do PPEB<br>
+      Portaria 1342/2026
+    </div>
+
+  </div>
+</body>
+</html>

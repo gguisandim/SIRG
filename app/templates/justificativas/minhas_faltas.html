@@ -1,0 +1,370 @@
+{% extends "base.html" %}
+
+{% block title %}Minhas Frequências{% endblock %}
+
+{% block content %}
+
+<style>
+  .faltas-page {
+    width: 100%;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 26px;
+    flex-wrap: wrap;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .btn-relatorio {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 38px;
+    padding: 0 16px;
+    border-radius: 10px;
+    background: linear-gradient(135deg, var(--orange), #ea6c0a);
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 5px 14px rgba(249,115,22,0.22);
+    white-space: nowrap;
+  }
+
+  .btn-relatorio:hover {
+    color: #ffffff;
+    opacity: 0.92;
+    text-decoration: none;
+  }
+
+  .faltas-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+  }
+
+  .faltas-card-header {
+    padding: 20px 24px;
+    border-bottom: 1.5px solid var(--border);
+    background: linear-gradient(135deg, var(--blue-light), #ffffff);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .faltas-card-header h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0;
+  }
+
+  .faltas-count {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    color: var(--text-muted);
+    border-radius: 999px;
+    padding: 6px 12px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .faltas-table-wrap {
+    width: 100%;
+    overflow-x: auto;
+  }
+
+  .faltas-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 0;
+  }
+
+  .faltas-table thead {
+    background: #f8fafc;
+  }
+
+  .faltas-table th {
+    padding: 15px 18px;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    border-bottom: 1.5px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .faltas-table td {
+    padding: 16px 18px;
+    font-size: 13.5px;
+    color: var(--text);
+    border-bottom: 1px solid var(--border);
+    vertical-align: middle;
+  }
+
+  .faltas-table tbody tr:hover {
+    background: #f8fafc;
+  }
+
+  .reuniao-title {
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  .date-pill {
+    display: inline-flex;
+    align-items: center;
+    background: var(--blue-light);
+    color: var(--blue);
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    border-radius: 999px;
+    padding: 5px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .status-ausente {
+    background: var(--orange-light);
+    color: var(--orange);
+  }
+
+  .status-justificada,
+  .status-justificado,
+  .status-presente {
+    background: #f0fdf4;
+    color: #15803d;
+  }
+
+  .justificativa-text {
+    display: block;
+    max-width: 520px;
+    color: var(--text);
+    line-height: 1.5;
+  }
+
+  .justificativa-pendente {
+    color: var(--text-muted);
+    font-style: italic;
+  }
+
+  .btn-justificar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 0 13px;
+    border-radius: 9px;
+    background: var(--blue);
+    color: #ffffff;
+    font-size: 12px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 5px 14px rgba(29,78,216,0.18);
+    white-space: nowrap;
+  }
+
+  .btn-justificar:hover {
+    background: #1e40af;
+    color: #ffffff;
+    text-decoration: none;
+  }
+
+  .already-done {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #15803d;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .empty-state {
+    padding: 46px 24px;
+    text-align: center;
+  }
+
+  .empty-icon {
+    width: 62px;
+    height: 62px;
+    border-radius: 18px;
+    background: var(--blue-light);
+    color: var(--blue);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    margin: 0 auto 16px;
+  }
+
+  .empty-state h2 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .empty-state p {
+    font-size: 13.5px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  @media (max-width: 760px) {
+    .page-header {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .page-header h1 {
+      font-size: 1.7rem;
+    }
+
+    .btn-relatorio {
+      width: 100%;
+    }
+
+    .faltas-card-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .faltas-table th,
+    .faltas-table td {
+      padding: 14px;
+    }
+  }
+</style>
+
+<div class="faltas-page">
+  <div class="page-header">
+    <div>
+      <h1>Minhas Frequências</h1>
+      <p>Consulte sua presença nas reuniões e envie justificativas quando necessário.</p>
+    </div>
+
+    <a 
+      href="{{ url_for('justificativas.relatorio_minhas_frequencias_pdf') }}" 
+      target="_blank"
+      class="btn-relatorio"
+    >
+      📄 Emitir relatório
+    </a>
+  </div>
+
+  <div class="faltas-card">
+    {% if faltas %}
+      <div class="faltas-card-header">
+        <h2>Frequências registradas</h2>
+        <span class="faltas-count">{{ faltas|length }} registro(s)</span>
+      </div>
+
+      <div class="faltas-table-wrap">
+        <table class="faltas-table">
+          <thead>
+            <tr>
+              <th>Reunião</th>
+              <th>Data</th>
+              <th>Status</th>
+              <th>Justificativa</th>
+              <th>Ação</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for falta in faltas %}
+              <tr>
+                <td>
+                  <span class="reuniao-title">{{ falta.reuniao.titulo }}</span>
+                </td>
+
+                <td>
+                  <span class="date-pill">
+                    {{ falta.reuniao.data.strftime('%d/%m/%Y') }}
+                  </span>
+                </td>
+
+                <td>
+                  {% if falta.status == "presente" %}
+                    <span class="status-badge status-presente">Presente</span>
+                  {% elif falta.status in ["justificado", "justificada"] %}
+                    <span class="status-badge status-justificada">Justificada</span>
+                  {% elif falta.status in ["ausente", "falta"] %}
+                    <span class="status-badge status-ausente">Ausente</span>
+                  {% else %}
+                    <span class="status-badge status-ausente">{{ falta.status }}</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  {% if falta.justificativa %}
+                    <span class="justificativa-text">{{ falta.justificativa }}</span>
+                  {% elif falta.status == "presente" %}
+                    <span class="justificativa-pendente">Não se aplica</span>
+                  {% else %}
+                    <span class="justificativa-pendente">Não enviada</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  {% if falta.status in ["ausente", "falta"] %}
+                    <a 
+                      href="{{ url_for('justificativas.justificar', frequencia_id=falta.id) }}" 
+                      class="btn-justificar"
+                    >
+                      Justificar
+                    </a>
+                  {% elif falta.status == "presente" %}
+                    <span class="already-done">✓ Presença confirmada</span>
+                  {% elif falta.status in ["justificado", "justificada"] %}
+                    <span class="already-done">✓ Já justificada</span>
+                  {% else %}
+                    <span class="justificativa-pendente">Sem ação</span>
+                  {% endif %}
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <div class="empty-icon">✅</div>
+        <h2>Nenhum registro encontrado</h2>
+        <p>Você ainda não possui frequências registradas em reuniões.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}

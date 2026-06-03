@@ -1,0 +1,505 @@
+{% extends "base.html" %}
+
+{% block title %}PPEB SISTEMA INTERNO{% endblock %}
+
+{% block content %}
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700&display=swap');
+
+  :root {
+    --bg: #f5f6fa;
+    --white: #ffffff;
+    --orange: #f97316;
+    --orange-light: #fff4ed;
+    --orange-dark: #ea6c0a;
+    --blue: #1d4ed8;
+    --blue-light: #eff6ff;
+    --blue-dark: #1a3fc0;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --border: #e2e8f0;
+    --shadow: 0 2px 12px rgba(0,0,0,0.07);
+    --shadow-hover: 0 8px 28px rgba(0,0,0,0.12);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    font-family: 'Sora', sans-serif;
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  .ppeb-wrapper {
+    max-width: 960px;
+    margin: 0 auto;
+    padding: 48px 24px 80px;
+  }
+
+  /* ── Header ── */
+  .ppeb-header {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    background: linear-gradient(135deg, var(--blue) 0%, #2563eb 60%, #3b82f6 100%);
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-bottom: 40px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 4px 24px rgba(29,78,216,0.3);
+  }
+
+  .ppeb-header::before {
+    content: '';
+    position: absolute;
+    top: -40px; right: -40px;
+    width: 220px; height: 220px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .ppeb-header::after {
+    content: '';
+    position: absolute;
+    bottom: -60px; right: 80px;
+    width: 160px; height: 160px;
+    border-radius: 50%;
+    background: rgba(249,115,22,0.15);
+  }
+
+  .header-logo {
+    width: 60px; height: 60px;
+    background: rgba(255,255,255,0.15);
+    border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+    backdrop-filter: blur(8px);
+    border: 1px solid rgba(255,255,255,0.2);
+  }
+
+  .header-text h1 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+
+  .header-text h1 span {
+    color: var(--orange);
+  }
+
+  .header-text p {
+    color: rgba(255,255,255,0.7);
+    font-size: 13px;
+    font-weight: 300;
+    margin-top: 4px;
+    line-height: 1.5;
+  }
+
+  .header-badge {
+    margin-left: auto;
+    background: rgba(249,115,22,0.2);
+    border: 1px solid rgba(249,115,22,0.4);
+    color: #fdba74;
+    font-size: 11px;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 6px 14px;
+    border-radius: 99px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── Section label ── */
+  .section-label {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 16px;
+    padding-left: 2px;
+  }
+
+  /* ── Nav grid ── */
+  .nav-grid {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+    gap: 16px;
+  }
+
+  /* ── Card ── */
+  .nav-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    transition: box-shadow 0.25s, border-color 0.25s, transform 0.2s;
+  }
+
+  .nav-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-2px);
+  }
+
+  .nav-card.open {
+    border-color: var(--orange);
+    transform: translateY(-2px);
+  }
+
+  /* Card trigger button */
+  .card-trigger {
+    width: 100%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 20px;
+    text-align: left;
+    transition: background 0.15s;
+  }
+
+  .card-trigger:hover {
+    background: var(--orange-light);
+  }
+
+  .nav-card.open .card-trigger {
+    background: var(--orange-light);
+    border-bottom: 1px solid #fed7aa;
+  }
+
+  /* Icon */
+  .card-icon {
+    width: 46px; height: 46px;
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    flex-shrink: 0;
+    background: var(--blue-light);
+    transition: background 0.2s, transform 0.2s;
+  }
+
+  .nav-card.open .card-icon,
+  .nav-card:hover .card-icon {
+    background: var(--orange-light);
+    transform: scale(1.05);
+  }
+
+  .card-info { flex: 1; }
+
+  .card-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    display: block;
+  }
+
+  .card-sub {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    font-weight: 300;
+    display: block;
+    margin-top: 2px;
+  }
+
+  /* Chevron */
+  .card-chevron {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: background 0.2s, transform 0.3s;
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .nav-card.open .card-chevron {
+    transform: rotate(180deg);
+    background: var(--orange);
+    color: #fff;
+  }
+
+  /* Dropdown */
+  .card-dropdown {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  .nav-card.open .card-dropdown {
+    max-height: 300px;
+  }
+
+  .card-dropdown ul {
+    list-style: none;
+    padding: 8px 0 10px;
+  }
+
+  .card-dropdown ul li a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 20px;
+    font-size: 13px;
+    font-weight: 400;
+    color: var(--text);
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s, padding-left 0.15s;
+  }
+
+  .card-dropdown ul li a:hover {
+    background: var(--blue-light);
+    color: var(--blue);
+    padding-left: 28px;
+  }
+
+  .sub-icon {
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+    transition: background 0.15s;
+  }
+
+  .card-dropdown ul li a:hover .sub-icon {
+    background: var(--blue-light);
+  }
+
+  /* ── Footer ── */
+  .ppeb-footer {
+    margin-top: 48px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .ppeb-footer span {
+    font-size: 12px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  .status-dot {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #16a34a;
+    font-weight: 500;
+  }
+
+  .status-dot::before {
+    content: '';
+    display: block;
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: #22c55e;
+    animation: pulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50%      { opacity: 0.3; }
+  }
+
+  /* ── Entrance ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(14px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .ppeb-header   { animation: fadeUp 0.45s ease both; }
+  .section-label { animation: fadeUp 0.45s 0.1s ease both; }
+  .nav-grid      { animation: fadeUp 0.45s 0.15s ease both; }
+  .ppeb-footer   { animation: fadeUp 0.45s 0.25s ease both; }
+</style>
+
+      <div class="ppeb-wrapper">
+
+        <!-- Header -->
+        <div class="ppeb-header">
+          <div class="header-logo">🏛️</div>
+          <div class="header-text">
+            <h1>Sistema <span>Integrado</span> de Registro e Gestão</h1>
+            <p>Gestão de frequência, reuniões, bancas e documentos administrativos.</p>
+          </div>
+          <span class="header-badge">● Online</span>
+        </div>
+
+        <p class="section-label">Módulos do sistema</p>
+
+        <nav>
+          <ul class="nav-grid">
+
+            <!-- Membros -->
+      <li class="nav-card" id="card-membros">
+        <button class="card-trigger" onclick="toggleCard('membros')">
+          <div class="card-icon">👥</div>
+          <div class="card-info">
+            <span class="card-title">Membros</span>
+            <span class="card-sub">Cadastro e frequência</span>
+          </div>
+          <div class="card-chevron">▾</div>
+        </button>
+        <div class="card-dropdown">
+          <ul>
+            <li>
+              <a href="{{ url_for('membros.listar_membros') }}">
+                <span class="sub-icon">📋</span> Listar Membros
+              </a>
+            </li>
+            <li>
+              <a href="{{ url_for('membros.cadastrar_membro') }}">
+                <span class="sub-icon">➕</span> Cadastrar Membro
+              </a>
+            </li>
+            <li>
+              <a href="{{ url_for('frequencias.listar_frequencias') }}">
+                <span class="sub-icon">✅</span> Verificar Frequência
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Reuniões -->
+      <li class="nav-card" id="card-reunioes">
+        <button class="card-trigger" onclick="toggleCard('reunioes')">
+          <div class="card-icon">📅</div>
+          <div class="card-info">
+            <span class="card-title">Reuniões</span>
+            <span class="card-sub">Colegiado e pautas</span>
+          </div>
+          <div class="card-chevron">▾</div>
+        </button>
+        <div class="card-dropdown">
+          <ul>
+            <li>
+              <a href="{{ url_for('reunioes.listar_reunioes') }}">
+                <span class="sub-icon">📋</span> Listar Reuniões
+              </a>
+            </li>
+            <li>
+              <a href="{{ url_for('reunioes.adicionar_reuniao') }}">
+                <span class="sub-icon">➕</span> Cadastrar Reunião
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Ofícios -->
+      <li class="nav-card" id="card-oficios">
+        <button class="card-trigger" onclick="toggleCard('oficios')">
+          <div class="card-icon">📄</div>
+          <div class="card-info">
+            <span class="card-title">Ofícios</span>
+            <span class="card-sub">Criar e visualizar documentos</span>
+          </div>
+          <div class="card-chevron">▾</div>
+        </button>
+
+        <div class="card-dropdown">
+          <ul>
+            <li>
+              <a href="{{ url_for('oficios.criar_oficio_interno') }}">
+                <span class="sub-icon">➕</span> Criar Ofício
+              </a>
+            </li>
+
+            <li>
+              <a href="{{ url_for('oficios.listar_oficios_internos') }}">
+                <span class="sub-icon">📄</span> Visualizar Ofícios
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+      <!-- Banca -->
+      <li class="nav-card" id="card-bancas">
+        <button class="card-trigger" onclick="toggleCard('bancas')">
+          <div class="card-icon">🎓</div>
+          <div class="card-info">
+            <span class="card-title">Banca</span>
+            <span class="card-sub">Defesas e avaliações</span>
+          </div>
+          <div class="card-chevron">▾</div>
+        </button>
+        <div class="card-dropdown">
+          <ul>
+            <li>
+              <a href="{{ url_for('bancas.cadastrar_banca') }}">
+                <span class="sub-icon">➕</span> Cadastrar Banca
+              </a>
+            </li>
+            <li>
+              <a href="{{ url_for('bancas.visualizar_banca') }}">
+                <span class="sub-icon">🔍</span> Visualizar Bancas
+              </a>
+            </li>
+          </ul>
+        </div>
+      </li>
+
+            <!-- Justificativas -->
+      <li class="nav-card" style="cursor:pointer;" onclick="window.location='{{ url_for('justificativas.minhas_faltas') }}'">
+        <div class="card-trigger">
+          <div class="card-icon">📝</div>
+          <div class="card-info">
+            <span class="card-title">Justificativas</span>
+            <span class="card-sub">Justificar faltas em reuniões</span>
+          </div>
+          <div class="card-chevron" style="font-size:15px; background:var(--blue); color:#fff;">→</div>
+        </div>
+      </li>
+
+      <!-- Relatórios (standalone — link direto) -->
+      <li class="nav-card" style="cursor:pointer;" onclick="window.location='{{ url_for('relatorios.gerar_relatorio') }}'">
+        <div class="card-trigger">
+          <div class="card-icon">📊</div>
+          <div class="card-info">
+            <span class="card-title">Relatórios</span>
+            <span class="card-sub">Gerar relatório geral</span>
+          </div>
+          <div class="card-chevron" style="font-size:15px; background:var(--blue); color:#fff;">→</div>
+        </div>
+      </li>
+
+    </ul>
+  </nav>
+
+  <footer class="ppeb-footer">
+    <span>PPEB — Programa de Pós-Graduação em Currículo e Gestão da Escola Básica</span>
+    <span class="status-dot">Sistema ativo</span>
+  </footer>
+
+</div>
+
+<script>
+  function toggleCard(id) {
+    const card = document.getElementById('card-' + id);
+    const isOpen = card.classList.contains('open');
+    document.querySelectorAll('.nav-card').forEach(c => c.classList.remove('open'));
+    if (!isOpen) card.classList.add('open');
+  }
+</script>
+
+{% endblock %}

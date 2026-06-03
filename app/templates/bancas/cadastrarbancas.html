@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastrar Banca{% endblock %}
+
+{% block content %}
+
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 auto 32px;
+    max-width: 620px;
+    width: 100%;
+  }
+
+  .page-header-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--blue), #3b82f6);
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 2px 10px rgba(29,78,216,0.25);
+  }
+
+  .page-header-text h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .page-header-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .form-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 620px;
+    width: 100%;
+    margin: 0 auto;
+    animation: fadeUp 0.4s ease both;
+    }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 18px;
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+  }
+
+  .field-group {
+    margin-bottom: 20px;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 7px;
+  }
+
+  .field-group input,
+  .field-group select,
+  .field-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13.5px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  }
+
+  .field-group select {
+    cursor: pointer;
+  }
+
+  .field-group textarea {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  .field-group input:focus,
+  .field-group select:focus,
+  .field-group textarea:focus {
+    border-color: var(--blue);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(29,78,216,0.08);
+  }
+
+  .field-tip {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 5px;
+    font-weight: 300;
+  }
+
+  .form-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark, #ea6c0a));
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(249,115,22,0.3);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 20px;
+    background: none;
+    color: var(--text-muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  @media (max-width: 720px) {
+    .field-row {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-icon">🎓</div>
+  <div class="page-header-text">
+    <h1>Cadastrar Banca</h1>
+    <p>Registre os dados da banca, sala, nível, status dos arquivos e envio de convite.</p>
+  </div>
+</div>
+
+<div class="form-card">
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <p class="form-section-label">Data e horário</p>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label for="data">Data</label>
+        <input 
+          type="date" 
+          id="data" 
+          name="data" 
+          required
+        >
+      </div>
+
+      <div class="field-group">
+        <label for="horario">Horário</label>
+        <input 
+          type="text" 
+          id="horario" 
+          name="horario" 
+          placeholder="Ex: 15H, 09H, 14H30 ou 14:30"
+          required
+        >
+        <p class="field-tip">Aceita formatos como 15H, 14H30 ou 14:30.</p>
+      </div>
+    </div>
+
+    <div class="form-divider"></div>
+
+    <p class="form-section-label">Participantes</p>
+
+    <div class="field-group">
+      <label for="responsavel_banca">Responsável pela Banca</label>
+      <input 
+        type="text" 
+        id="responsavel_banca" 
+        name="responsavel_banca" 
+        placeholder="Nome do responsável pela banca"
+        required
+      >
+    </div>
+
+    <div class="field-group">
+      <label for="orientador">Orientador</label>
+      <input 
+        type="text" 
+        id="orientador" 
+        name="orientador" 
+        placeholder="Nome do orientador"
+        required
+      >
+    </div>
+
+    <div class="form-divider"></div>
+
+    <p class="form-section-label">Detalhes da banca</p>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label for="sala">Sala</label>
+        <select id="sala" name="sala">
+          <option value="">Selecione a sala</option>
+          <option value="NEB 01">NEB 01</option>
+          <option value="NEB 02">NEB 02</option>
+          <option value="NEB 03">NEB 03</option>
+          <option value="NEB 04">NEB 04</option>
+          <option value="NEB 05">NEB 05</option>
+          <option value="NEB 06">NEB 06</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label for="nivel">Nível</label>
+        <select id="nivel" name="nivel" required>
+          <option value="">Selecione o nível</option>
+          <option value="Defesa-Mestrado">Defesa-Mestrado</option>
+          <option value="Defesa-Doutorado">Defesa-Doutorado</option>
+          <option value="Qualificação-Mestrado">Qualificação-Mestrado</option>
+          <option value="Qualificação-Doutorado">Qualificação-Doutorado</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="form-divider"></div>
+
+    <p class="form-section-label">Status de publicação</p>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label for="drive_status">Drive</label>
+        <select id="drive_status" name="drive_status">
+          <option value="pendente">Pendente</option>
+          <option value="OK">OK</option>
+          <option value="erro">Erro</option>
+        </select>
+      </div>
+
+      <div class="field-group">
+        <label for="site_status">Site</label>
+        <select id="site_status" name="site_status">
+          <option value="pendente">Pendente</option>
+          <option value="OK">OK</option>
+          <option value="erro">Erro</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label for="erro_sigaa">Erro no SIGAA</label>
+      <textarea 
+        id="erro_sigaa" 
+        name="erro_sigaa" 
+        placeholder="Ex: Sala errada no SIGAA, ausência de membro externo, ou deixe vazio se não houver erro."
+      ></textarea>
+    </div>
+
+    <div class="form-divider"></div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">
+        ✚ Cadastrar Banca
+      </button>
+
+      <a href="{{ url_for('bancas.visualizar_banca') }}" class="btn-secondary">
+        ← Voltar
+      </a>
+    </div>
+  </form>
+</div>
+
+{% endblock %}

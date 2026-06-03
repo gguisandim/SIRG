@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <title>Ofício Nº {{ oficio.numero }}/{{ oficio.ano }}</title>
+
+  <style>
+    body {
+      background: #f2f2f2;
+      font-family: "Times New Roman", Times, serif;
+      margin: 0;
+      padding: 40px 0;
+      color: #000;
+    }
+
+    .pagina {
+      width: 794px;
+      min-height: 1123px;
+      background: #fff;
+      margin: 0 auto;
+      padding: 42px 55px;
+      box-sizing: border-box;
+      box-shadow: 0 0 8px rgba(0,0,0,0.15);
+    }
+
+    .topo-logos {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 8px;
+    }
+
+    .topo-logos img {
+      max-height: 42px;
+      object-fit: contain;
+    }
+
+    .cabecalho {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      line-height: 1.15;
+      text-transform: uppercase;
+      margin-bottom: 34px;
+    }
+
+    .linha-oficio {
+      display: flex;
+      justify-content: space-between;
+      gap: 20px;
+      font-size: 16px;
+      margin-bottom: 28px;
+    }
+
+    .destinatario {
+      font-size: 16px;
+      line-height: 1.35;
+      margin-bottom: 22px;
+    }
+
+    .assunto {
+      font-size: 16px;
+      line-height: 1.35;
+      margin-bottom: 28px;
+    }
+
+    .saudacao {
+      font-size: 16px;
+      margin-bottom: 22px;
+    }
+
+    .corpo {
+      font-size: 16px;
+      line-height: 1.45;
+      text-align: justify;
+      margin-bottom: 28px;
+      white-space: pre-line;
+    }
+
+    .assinatura-label {
+      font-size: 16px;
+      margin-top: 34px;
+      margin-bottom: 58px;
+    }
+
+    .assinatura {
+      text-align: center;
+      font-size: 16px;
+      line-height: 1.25;
+    }
+
+    .assinatura strong {
+      font-style: italic;
+    }
+
+    .acoes {
+      width: 794px;
+      margin: 18px auto 0;
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .btn {
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      text-decoration: none;
+      border: 1px solid #cbd5e1;
+      background: #fff;
+      color: #334155;
+      padding: 9px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: #f97316;
+      color: #fff;
+      border-color: #f97316;
+    }
+
+    @media (max-width: 820px) {
+      body {
+        padding: 10px;
+      }
+
+      .pagina,
+      .acoes {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .pagina {
+        padding: 24px 20px;
+        min-height: auto;
+      }
+
+      .linha-oficio {
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .topo-logos img {
+        max-height: 30px;
+      }
+
+      .cabecalho,
+      .linha-oficio,
+      .destinatario,
+      .assunto,
+      .saudacao,
+      .corpo,
+      .assinatura-label,
+      .assinatura {
+        font-size: 15px;
+      }
+
+      .acoes {
+        flex-direction: column;
+      }
+
+      .btn {
+        text-align: center;
+      }
+    }
+
+    @media print {
+      body {
+        background: white;
+        padding: 0;
+      }
+
+      .pagina {
+        box-shadow: none;
+        width: auto;
+        min-height: auto;
+      }
+
+      .acoes {
+        display: none;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="pagina">
+
+    <div class="topo-logos">
+      <img src="{{ url_for('static', filename='img/neb.png') }}" alt="NEB">
+      <img src="{{ url_for('static', filename='img/ufpa.png') }}" alt="UFPA">
+      <img src="{{ url_for('static', filename='img/ppeb.png') }}" alt="PPEB">
+    </div>
+
+    <div class="cabecalho">
+      UNIVERSIDADE FEDERAL DO PARÁ<br>
+      NÚCLEO DE ESTUDOS TRANSDISCIPLINARES EM EDUCAÇÃO BÁSICA<br>
+      PROGRAMA DE PÓS-GRADUAÇÃO EM CURRÍCULO E GESTÃO DA ESCOLA BÁSICA
+    </div>
+
+    <div class="linha-oficio">
+      <div>
+        OFÍCIO Nº {{ oficio.numero }}/{{ oficio.ano }} - PPEB/NEB
+      </div>
+
+      <div>
+        Belém, {{ oficio.criado_em.strftime('%d/%m/%Y') if oficio.criado_em else '' }}.
+      </div>
+    </div>
+
+    <div class="destinatario">
+      <strong>Ao(À):</strong><br>
+      {{ oficio.destinatario or 'Destinatário não informado' }}
+    </div>
+
+    <div class="assunto">
+      <strong>Assunto:</strong> {{ oficio.titulo }}
+    </div>
+
+    <div class="saudacao">
+      Prezado(a),
+    </div>
+
+    <div class="corpo">
+      {% if oficio.corpo %}
+        {{ oficio.corpo }}
+      {% elif oficio.descricao %}
+        {{ oficio.descricao }}
+      {% else %}
+        Texto do ofício não informado.
+      {% endif %}
+    </div>
+
+    <div class="assinatura-label">
+      Atenciosamente,
+    </div>
+
+    <div class="assinatura">
+      <strong>Émina Santos</strong><br>
+      Coordenadora do PPEB<br>
+      Portaria 1342/2026
+    </div>
+
+  </div>
+
+  <div class="acoes">
+    <a href="{{ url_for('oficios.editar_oficio_interno', id=oficio.id) }}" class="btn">
+      ✏️ Editar
+    </a>
+
+    <button onclick="window.print()" class="btn btn-primary">
+      📄 Imprimir / PDF
+    </button>
+  </div>
+</body>
+</html>

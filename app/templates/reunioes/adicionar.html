@@ -1,0 +1,425 @@
+{% extends "base.html" %}
+
+{% block title %}Cadastrar Reunião{% endblock %}
+
+{% block content %}
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    width: 100%;
+    max-width: 600px;
+    margin: 0 auto 32px;
+  }
+
+  .page-header-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--blue), #3b82f6);
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 2px 10px rgba(29,78,216,0.25);
+    flex-shrink: 0;
+  }
+
+  .page-header-text h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .page-header-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .form-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    max-width: 600px;
+    width: 100%;
+    margin: 0 auto;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-section-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .field-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+
+  .field-group {
+    margin-bottom: 18px;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 7px;
+  }
+
+  .field-group input,
+  .field-group select,
+  .field-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .field-group input[type="date"],
+  .field-group input[type="time"] {
+    cursor: pointer;
+  }
+
+  .field-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+    cursor: pointer;
+  }
+
+  .field-group textarea {
+    resize: vertical;
+    min-height: 130px;
+    line-height: 1.6;
+  }
+
+  .field-group input:focus,
+  .field-group select:focus,
+  .field-group textarea:focus {
+    border-color: var(--blue);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(29,78,216,0.08);
+  }
+
+  .field-group input::placeholder,
+  .field-group textarea::placeholder {
+    color: #94a3b8;
+  }
+
+  .input-wrapper {
+    position: relative;
+  }
+
+  .input-wrapper .input-icon {
+    position: absolute;
+    left: 13px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-size: 15px;
+    pointer-events: none;
+  }
+
+  .input-wrapper input,
+  .input-wrapper select {
+    padding-left: 38px;
+  }
+
+  .textarea-wrapper {
+    position: relative;
+  }
+
+  .textarea-wrapper .input-icon {
+    position: absolute;
+    left: 13px;
+    top: 12px;
+    font-size: 15px;
+    pointer-events: none;
+  }
+
+  .textarea-wrapper textarea {
+    padding-left: 38px;
+  }
+
+  .form-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 24px 0;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    background: linear-gradient(135deg, var(--orange), #ea6c0a);
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 2px 10px rgba(249,115,22,0.3);
+  }
+
+  .btn-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(249,115,22,0.35);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 20px;
+    background: none;
+    color: var(--text-muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  @media (max-width: 640px) {
+    .page-header,
+    .form-card {
+      max-width: 100%;
+    }
+
+    .form-card {
+      padding: 28px 22px;
+    }
+
+    .field-row {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column;
+      align-items: stretch;
+    }
+
+    .btn-primary,
+    .btn-secondary {
+      justify-content: center;
+      width: 100%;
+    }
+  }
+</style>
+
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header-icon">📅</div>
+  <div class="page-header-text">
+    <h1>Cadastrar Reunião</h1>
+    <p>Preencha os dados para agendar uma nova reunião.</p>
+  </div>
+</div>
+
+<div class="form-card">
+  <form method="POST">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <p class="form-section-label">📋 Identificação</p>
+
+    <div class="field-group">
+      <label for="titulo">Título da Reunião</label>
+      <div class="input-wrapper">
+        <span class="input-icon">✏️</span>
+        <input type="text" id="titulo" name="titulo" placeholder="Ex: Reunião Ordinária do Colegiado" required>
+      </div>
+    </div>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label for="data">Data</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🗓</span>
+          <input type="date" id="data" name="data" required>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="horario">Horário</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🕐</span>
+          <input type="time" id="horario" name="horario" required>
+        </div>
+      </div>
+    </div>
+
+    <div class="form-divider"></div>
+
+    <p class="form-section-label">📍 Detalhes</p>
+
+    <div class="field-row">
+      <div class="field-group">
+        <label for="tipo">Tipo de Reunião</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🏷</span>
+          <select id="tipo" name="tipo" required>
+            <option value="">Selecione o tipo</option>
+            <option value="Ordinária">Ordinária</option>
+            <option value="Extraordinária">Extraordinária</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <label for="local">Local</label>
+        <div class="input-wrapper">
+          <span class="input-icon">📌</span>
+          <select id="local" name="local" required>
+            <option value="">Selecione o local</option>
+            <option value="NEB01">NEB01</option>
+            <option value="NEB02">NEB02</option>
+            <option value="NEB03">NEB03</option>
+            <option value="NEB04">NEB04</option>
+            <option value="NEB05">NEB05</option>
+            <option value="NEB06">NEB06</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="field-group">
+  <label for="numero_oficio">Número do Ofício</label>
+  <div class="input-wrapper">
+    <span class="input-icon">🔢</span>
+    <input 
+      type="number" 
+      id="numero_oficio" 
+      name="numero_oficio" 
+      placeholder="Ex: 12"
+    >
+  </div>
+</div>
+
+    <div class="field-group">
+      <label for="pauta">Pauta da Reunião</label>
+      <div class="textarea-wrapper">
+        <span class="input-icon">📝</span>
+        <textarea id="pauta" name="pauta" rows="6" placeholder="Digite os tópicos da pauta da reunião..."></textarea>
+      </div>
+    </div>
+
+    <div class="form-divider"></div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">
+        ✚ Cadastrar Reunião
+      </button>
+
+      <button type="button" id="btn-gerar-pauta-ia" class="btn-secondary">
+  🤖 Gerar pauta com IA
+      </button>
+
+      <a href="{{ url_for('reunioes.listar_reunioes') }}" class="btn-secondary">
+        ← Cancelar
+      </a>
+    </div>
+
+  </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+    const botao = document.getElementById("btn-gerar-pauta-ia");
+    const campoPauta = document.getElementById("pauta");
+
+    if (!botao || !campoPauta) {
+        return;
+    }
+
+    botao.addEventListener("click", async function () {
+        botao.disabled = true;
+        botao.innerText = "Gerando pauta...";
+
+        const dados = {
+            titulo: document.querySelector("[name='titulo']")?.value || "",
+            data: document.querySelector("[name='data']")?.value || "",
+            horario: document.querySelector("[name='horario']")?.value || "",
+            local: document.querySelector("[name='local']")?.value || "",
+            tipo: document.querySelector("[name='tipo']")?.value || "",
+            pauta: campoPauta.value || ""
+        };
+
+        try {
+            const resposta = await fetch("{{ url_for('reunioes.gerar_pauta_ia_cadastro') }}", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": "{{ csrf_token() }}"
+                },
+                body: JSON.stringify(dados)
+            });
+
+            const resultado = await resposta.json();
+
+            if (!resposta.ok || !resultado.sucesso) {
+                alert("Erro: " + (resultado.erro || "Não foi possível gerar a pauta."));
+                return;
+            }
+
+            campoPauta.value = resultado.texto;
+
+        } catch (erro) {
+            console.error(erro);
+            alert("Erro ao conectar com a IA.");
+        } finally {
+            botao.disabled = false;
+            botao.innerText = "🤖 Gerar pauta com IA";
+        }
+    });
+});
+</script>
+
+{% endblock %}

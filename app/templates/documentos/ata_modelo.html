@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+
+<style>
+  body {
+    margin: 0;
+    background: #222;
+    font-family: "Times New Roman", Times, serif;
+    color: #000;
+  }
+
+  .page {
+    width: 794px;
+    min-height: 1123px;
+    margin: 0 auto;
+    background: white;
+    padding: 55px 60px 70px 60px;
+    box-sizing: border-box;
+  }
+
+  .logo {
+    text-align: center;
+    margin-bottom: 12px;
+  }
+
+  .logo img {
+    width: 82px;
+  }
+
+  .cabecalho {
+    text-align: center;
+    font-size: 11px;
+    font-weight: bold;
+    line-height: 1.15;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  .titulo-ata {
+    width: 330px;
+    margin-left: auto;
+    margin-bottom: 42px;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 1.15;
+    text-align: justify;
+  }
+
+  .ata-container {
+    font-size: 16px;
+    line-height: 1.45;
+  }
+
+  .linha {
+    display: grid;
+    grid-template-columns: 28px 1fr;
+    column-gap: 12px;
+    margin-bottom: 2px;
+    align-items: start;
+  }
+
+  .numero {
+    text-align: right;
+    font-size: 14px;
+    line-height: 1.45;
+  }
+
+  .texto-linha {
+    text-align: justify;
+    text-align-last: justify;
+    line-height: 1.45;
+    word-break: normal;
+    overflow-wrap: normal;
+  }
+</style>
+</head>
+
+<body>
+  <div class="page">
+
+    <div class="logo">
+      <img src="{{ url_for('static', filename='img/ppeb.png') }}">
+    </div>
+
+    <div class="cabecalho">
+      SERVIÇO PÚBLICO FEDERAL<br>
+      UNIVERSIDADE FEDERAL DO PARÁ<br>
+      NÚCLEO DE ESTUDOS TRANSDISCIPLINARES EM EDUCAÇÃO BÁSICA<br>
+      PROGRAMA DE PÓS-GRADUAÇÃO EM CURRÍCULO E GESTÃO DA ESCOLA BÁSICA
+    </div>
+
+    <div class="titulo-ata">
+      Ata da Reunião {{ reuniao.tipo }} do Colegiado do Programa de Pós-Graduação em Currículo e Gestão da Escola Básica do NEB/UFPA, realizada no dia {{ reuniao.data.strftime('%d/%m/%Y') }}.
+    </div>
+
+    <div class="ata-container">
+      {% for linha in ata_linhas %}
+        <div class="linha">
+          <div class="numero">{{ loop.index }}</div>
+          <div class="texto-linha">{{ linha }}</div>
+        </div>
+      {% endfor %}
+    </div>
+
+  </div>
+</body>
+</html>

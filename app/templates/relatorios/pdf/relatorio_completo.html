@@ -1,0 +1,161 @@
+{% extends "relatorios/pdf/base_pdf.html" %}
+
+{% block titulo_pdf %}
+Relatório Geral do PPEB
+{% endblock %}
+
+{% block corpo_pdf %}
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <span>Membros</span>
+    <strong>{{ total_membros }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Professores</span>
+    <strong>{{ total_professores }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Reuniões</span>
+    <strong>{{ total_reunioes }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Bancas</span>
+    <strong>{{ total_bancas }}</strong>
+  </div>
+</div>
+
+<h2>Resumo de frequência</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Presentes</th>
+      <th>Ausentes</th>
+      <th>Justificados</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td>{{ total_presentes }}</td>
+      <td>{{ total_ausentes }}</td>
+      <td>{{ total_justificados }}</td>
+    </tr>
+  </tbody>
+</table>
+
+<h2>Frequência por professor</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Professor</th>
+      <th>Presentes</th>
+      <th>Ausentes</th>
+      <th>Justificados</th>
+      <th>Total</th>
+      <th>% Presença</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for item in resumo_professores %}
+      <tr>
+        <td>{{ item.professor.nome }}</td>
+        <td>{{ item.presentes }}</td>
+        <td>{{ item.ausentes }}</td>
+        <td>{{ item.justificados }}</td>
+        <td>{{ item.total_registros }}</td>
+        <td>{{ item.percentual_presenca }}%</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Reuniões no período</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Horário</th>
+      <th>Título</th>
+      <th>Tipo</th>
+      <th>Local</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for reuniao in reunioes %}
+      <tr>
+        <td>{{ reuniao.data.strftime('%d/%m/%Y') }}</td>
+        <td>{{ reuniao.horario.strftime('%H:%M') }}</td>
+        <td>{{ reuniao.titulo }}</td>
+        <td>{{ reuniao.tipo }}</td>
+        <td>{{ reuniao.local }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Bancas no período</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Horário</th>
+      <th>Responsável</th>
+      <th>Orientador</th>
+      <th>Sala</th>
+      <th>Nível</th>
+      <th>Convite</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for banca in bancas %}
+      <tr>
+        <td>{{ banca.data.strftime('%d/%m/%Y') }}</td>
+        <td>{{ banca.horario.strftime('%H:%M') }}</td>
+        <td>{{ banca.responsavel_banca }}</td>
+        <td>{{ banca.orientador }}</td>
+        <td>{{ banca.sala or '-' }}</td>
+        <td>{{ banca.nivel }}</td>
+        <td>{{ 'Enviado' if banca.convite_enviado else 'Pendente' }}</td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Documentos</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Tipo</th>
+      <th>Total usado</th>
+      <th>Cancelados</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <tr>
+      <td>Ofícios internos</td>
+      <td>{{ total_oficios_internos }}</td>
+      <td>{{ oficios_cancelados|length }}</td>
+    </tr>
+
+    <tr>
+      <td>Editais</td>
+      <td>{{ total_editais }}</td>
+      <td>{{ editais_cancelados|length }}</td>
+    </tr>
+  </tbody>
+</table>
+
+{% endblock %}

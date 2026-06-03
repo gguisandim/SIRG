@@ -1,0 +1,673 @@
+<!-- app/templates/membros/listar.html -->
+{% extends "base.html" %}
+
+{% block title %}Lista de Membros{% endblock %}
+
+{% block content %}
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .page-header-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--blue), #3b82f6);
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 2px 10px rgba(29,78,216,0.25);
+    flex-shrink: 0;
+  }
+
+  .page-header-text h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .page-header-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 20px;
+    background: linear-gradient(135deg, var(--orange), #ea6c0a);
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(249,115,22,0.28);
+    white-space: nowrap;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.92;
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 12px;
+    background: var(--white);
+    color: var(--text);
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    text-decoration: none;
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .filter-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 20px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 14px;
+  }
+
+  .filter-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    padding: 9px 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .table-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  }
+
+  .table-topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .table-count {
+    font-size: 12.5px;
+    font-weight: 500;
+    color: var(--text-muted);
+  }
+
+  .table-count strong {
+    color: var(--blue);
+    font-weight: 700;
+  }
+
+  .table-wrapper {
+    overflow-x: auto;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1050px;
+  }
+
+  thead th {
+    padding: 13px 20px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg);
+    border-bottom: 1.5px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: var(--blue-light);
+  }
+
+  tbody td {
+    padding: 14px 20px;
+    font-size: 13.5px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .cell-nome {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-light), #bfdbfe);
+    border: 1.5px solid #bfdbfe;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+
+  .nome-text {
+    font-weight: 600;
+    color: var(--text);
+    font-size: 13.5px;
+  }
+
+  .cell-email {
+    color: var(--text-muted);
+    font-size: 13px;
+  }
+
+  .tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 99px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .tipo-badge.professor {
+    background: var(--orange-light);
+    color: var(--orange);
+    border: 1px solid #fed7aa;
+  }
+
+  .tipo-badge.discente {
+    background: var(--blue-light);
+    color: var(--blue);
+    border: 1px solid #bfdbfe;
+  }
+
+  .tipo-badge.tecnico {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid var(--border);
+  }
+
+  .tipo-badge.outro {
+    background: #f1f5f9;
+    color: #475569;
+    border: 1px solid var(--border);
+  }
+
+  .linha-tag,
+  .extra-tag {
+    display: inline-block;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 3px 9px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .linha-vazia {
+    color: #cbd5e1;
+    font-size: 18px;
+    display: block;
+    text-align: center;
+  }
+
+  .actions-cell {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 8px 12px;
+    background: none;
+    color: #ef4444;
+    font-family: 'Sora', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    border: 1.5px solid #fecaca;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .btn-delete:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+  }
+
+  .empty-state {
+    text-align: center;
+    padding: 64px 24px;
+  }
+
+  .empty-icon {
+    font-size: 48px;
+    margin-bottom: 16px;
+    opacity: 0.4;
+  }
+
+  .empty-state h3 {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .empty-state p {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-bottom: 24px;
+  }
+
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open {
+    display: flex;
+  }
+
+  .modal-box {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 380px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    text-align: center;
+  }
+
+  .modal-icon {
+    font-size: 40px;
+    margin-bottom: 12px;
+  }
+
+  .modal-box h3 {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .modal-box p {
+    font-size: 13px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 24px;
+  }
+
+  .modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+  }
+
+  .modal-confirm {
+    padding: 10px 22px;
+    background: #ef4444;
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  .modal-cancel {
+    padding: 10px 22px;
+    background: none;
+    color: var(--text-muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+  }
+
+  @media (max-width: 1000px) {
+    .filter-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 640px) {
+    .filter-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .page-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .nome-text {
+      font-size: 13px;
+    }
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="page-header-icon">👥</div>
+    <div class="page-header-text">
+      <h1>Membros Cadastrados</h1>
+      <p>Gerencie professores, discentes e técnicos do programa.</p>
+    </div>
+  </div>
+
+  <a href="{{ url_for('membros.cadastrar_membro') }}" class="btn-primary">
+    ✚ Novo Membro
+  </a>
+</div>
+
+<form method="GET" class="filter-card">
+  <div class="filter-grid">
+    <div class="filter-group">
+      <label for="busca">Buscar</label>
+      <input
+        type="text"
+        id="busca"
+        name="busca"
+        value="{{ request.args.get('busca', '') }}"
+        placeholder="Nome, e-mail ou SIAP"
+      >
+    </div>
+
+    <div class="filter-group">
+      <label for="tipo">Tipo</label>
+      <select id="tipo" name="tipo">
+        <option value="">Todos</option>
+        <option value="professor" {% if request.args.get('tipo') == 'professor' %}selected{% endif %}>Professor</option>
+        <option value="discente" {% if request.args.get('tipo') == 'discente' %}selected{% endif %}>Discente</option>
+        <option value="tecnico" {% if request.args.get('tipo') == 'tecnico' %}selected{% endif %}>Técnico</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="linha_de_pesquisa">Linha de Pesquisa</label>
+      <select id="linha_de_pesquisa" name="linha_de_pesquisa">
+        <option value="">Todas</option>
+        <option value="Historia da Educação Basica" {% if request.args.get('linha_de_pesquisa') == 'Historia da Educação Basica' %}selected{% endif %}>História da Educação Básica</option>
+        <option value="Currículo da Educação Básica" {% if request.args.get('linha_de_pesquisa') == 'Currículo da Educação Básica' %}selected{% endif %}>Currículo da Educação Básica</option>
+        <option value="Gestão e Organização do Trabalho Pedagógico Na Escola Básica" {% if request.args.get('linha_de_pesquisa') == 'Gestão e Organização do Trabalho Pedagógico Na Escola Básica' %}selected{% endif %}>Gestão e Organização do Trabalho Pedagógico</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="nivel_discente">Nível</label>
+      <select id="nivel_discente" name="nivel_discente">
+        <option value="">Todos</option>
+        <option value="mestrado" {% if request.args.get('nivel_discente') == 'mestrado' %}selected{% endif %}>Mestrado</option>
+        <option value="doutorado" {% if request.args.get('nivel_discente') == 'doutorado' %}selected{% endif %}>Doutorado</option>
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="ordem">Ordenar por</label>
+      <select id="ordem" name="ordem">
+        <option value="nome_asc" {% if request.args.get('ordem', 'nome_asc') == 'nome_asc' %}selected{% endif %}>Nome A-Z</option>
+        <option value="nome_desc" {% if request.args.get('ordem') == 'nome_desc' %}selected{% endif %}>Nome Z-A</option>
+        <option value="tipo" {% if request.args.get('ordem') == 'tipo' %}selected{% endif %}>Tipo</option>
+        <option value="email" {% if request.args.get('ordem') == 'email' %}selected{% endif %}>E-mail</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-actions">
+    <button type="submit" class="btn-primary">
+      Buscar
+    </button>
+
+    <a href="{{ url_for('membros.listar_membros') }}" class="btn-secondary">
+      Limpar filtros
+    </a>
+  </div>
+</form>
+
+{% if membros %}
+  <div class="table-card">
+    <div class="table-topbar">
+      <span class="table-count">
+        <strong>{{ membros|length }}</strong>
+        membro{{ 's' if membros|length != 1 }}
+        encontrado{{ 's' if membros|length != 1 }}
+      </span>
+    </div>
+
+    <div class="table-wrapper">
+      <table>
+        <thead>
+          <tr>
+            <th>Nome</th>
+            <th>Email</th>
+            <th>Tipo</th>
+            <th>SIAP</th>
+            <th>Linha de Pesquisa</th>
+            <th>Nível</th>
+            <th>Ações</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for membro in membros %}
+            <tr>
+              <td>
+                <div class="cell-nome">
+                  <div class="avatar">{{ membro.nome[0]|upper }}</div>
+                  <span class="nome-text">{{ membro.nome }}</span>
+                </div>
+              </td>
+
+              <td class="cell-email">{{ membro.email }}</td>
+
+              <td>
+                {% set tipo = membro.tipo|lower %}
+                <span class="tipo-badge {{ tipo if tipo in ['professor', 'discente', 'tecnico'] else 'outro' }}">
+                  {% if tipo == 'professor' %}
+                    🎓 Professor
+                  {% elif tipo == 'discente' %}
+                    📚 Discente
+                  {% elif tipo == 'tecnico' %}
+                    🛠 Técnico
+                  {% else %}
+                    👤 {{ membro.tipo }}
+                  {% endif %}
+                </span>
+              </td>
+
+              <td>
+                {% if membro.siap %}
+                  <span class="extra-tag">{{ membro.siap }}</span>
+                {% else %}
+                  <span class="linha-vazia">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if membro.linha_de_pesquisa %}
+                  <span class="linha-tag">{{ membro.linha_de_pesquisa }}</span>
+                {% else %}
+                  <span class="linha-vazia">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                {% if membro.nivel_discente %}
+                  <span class="extra-tag">
+                    {{ 'Mestrado' if membro.nivel_discente == 'mestrado' else 'Doutorado' }}
+                  </span>
+                {% else %}
+                  <span class="linha-vazia">—</span>
+                {% endif %}
+              </td>
+
+              <td>
+                <div class="actions-cell">
+                  <form
+                    method="POST"
+                    action="{{ url_for('usuarios.resetar_senha_membro', membro_id=membro.id) }}"
+                    onsubmit="return confirm('Resetar a senha deste usuário para 123456?');"
+                  >
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+                    <button type="submit" class="btn-secondary">
+                      🔑 Resetar senha
+                    </button>
+                  </form>
+
+                  <button
+                    class="btn-delete"
+                    data-url="{{ url_for('membros.excluir_membro', id=membro.id) }}"
+                    data-nome="{{ membro.nome }}"
+                    onclick="abrirModal(this.dataset.url, this.dataset.nome)"
+                  >
+                    🗑 Excluir
+                  </button>
+                </div>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+{% else %}
+  <div class="table-card">
+    <div class="empty-state">
+      <div class="empty-icon">👥</div>
+      <h3>Nenhum membro encontrado</h3>
+      <p>Altere os filtros ou cadastre um novo membro.</p>
+
+      <a href="{{ url_for('membros.cadastrar_membro') }}" class="btn-primary">
+        ✚ Cadastrar Membro
+      </a>
+    </div>
+  </div>
+{% endif %}
+
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <h3>Excluir membro?</h3>
+    <p id="modalMsg">Esta ação não pode ser desfeita.</p>
+
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="fecharModal()">Cancelar</button>
+
+      <form id="deleteForm" method="POST">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class="modal-confirm">Sim, excluir</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  function abrirModal(url, nome) {
+    document.getElementById('deleteForm').action = url;
+    document.getElementById('modalMsg').textContent = `Tem certeza que deseja excluir "${nome}"? Esta ação não pode ser desfeita.`;
+    document.getElementById('deleteModal').classList.add('open');
+  }
+
+  function fecharModal() {
+    document.getElementById('deleteModal').classList.remove('open');
+  }
+
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) fecharModal();
+  });
+</script>
+
+{% endblock %}

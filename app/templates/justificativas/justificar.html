@@ -1,0 +1,331 @@
+{% extends "base.html" %}
+
+{% block title %}Justificar Falta{% endblock %}
+
+{% block content %}
+
+<style>
+  .justificar-page {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .page-header {
+    margin-bottom: 26px;
+  }
+
+  .page-header h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .page-header p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .justificativa-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+    overflow: hidden;
+  }
+
+  .justificativa-card-header {
+    padding: 22px 26px;
+    border-bottom: 1.5px solid var(--border);
+    background: linear-gradient(135deg, var(--blue-light), #ffffff);
+  }
+
+  .justificativa-card-header h2 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--text);
+    margin: 0 0 6px;
+  }
+
+  .justificativa-card-header p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .justificativa-info-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+    padding: 22px 26px;
+    border-bottom: 1.5px solid var(--border);
+    background: #f8fafc;
+  }
+
+  .justificativa-info-item {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 14px;
+  }
+
+  .justificativa-info-item span {
+    display: block;
+    font-size: 10.5px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 6px;
+  }
+
+  .justificativa-info-item strong {
+    display: block;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .status-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    padding: 5px 10px;
+    border-radius: 999px;
+    background: var(--orange-light);
+    color: var(--orange);
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .justificativa-form {
+    padding: 26px;
+  }
+
+  .form-group {
+    margin-bottom: 20px;
+  }
+
+  .form-group label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .form-control {
+    width: 100%;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    color: var(--text);
+    background: var(--white);
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+
+  .form-control:focus {
+    border-color: #bfdbfe;
+    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.08);
+    outline: none;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 150px;
+  }
+
+  .file-help {
+    display: block;
+    margin-top: 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .anexo-atual {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    background: var(--blue-light);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 14px;
+    padding: 14px 16px;
+    margin: 4px 0 22px;
+  }
+
+  .anexo-atual strong {
+    display: block;
+    font-size: 13px;
+    color: var(--text);
+    margin-bottom: 2px;
+  }
+
+  .anexo-atual span {
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  .anexo-atual a {
+    color: var(--blue);
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .anexo-atual a:hover {
+    text-decoration: underline;
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 6px;
+  }
+
+  .btn-voltar,
+  .btn-enviar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 42px;
+    padding: 0 18px;
+    border-radius: 11px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    font-family: 'Sora', sans-serif;
+  }
+
+  .btn-voltar {
+    background: var(--white);
+    color: var(--text-muted);
+    border: 1.5px solid var(--border);
+  }
+
+  .btn-voltar:hover {
+    background: #f8fafc;
+    color: var(--text);
+  }
+
+  .btn-enviar {
+    background: var(--blue);
+    color: #ffffff;
+    box-shadow: 0 6px 18px rgba(29,78,216,0.22);
+  }
+
+  .btn-enviar:hover {
+    background: #1e40af;
+    color: #ffffff;
+  }
+
+  @media (max-width: 760px) {
+    .justificativa-info-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .form-actions {
+      flex-direction: column-reverse;
+    }
+
+    .btn-voltar,
+    .btn-enviar {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="justificar-page">
+  <div class="page-header">
+    <div>
+      <h1>Justificar Falta</h1>
+      <p>Envie a justificativa referente à reunião selecionada.</p>
+    </div>
+  </div>
+
+  <div class="justificativa-card">
+    <div class="justificativa-card-header">
+      <h2>Dados da ausência</h2>
+      <p>Confira as informações da reunião antes de enviar sua justificativa.</p>
+    </div>
+
+    <div class="justificativa-info-grid">
+      <div class="justificativa-info-item">
+        <span>Reunião</span>
+        <strong>{{ frequencia.reuniao.titulo }}</strong>
+      </div>
+
+      <div class="justificativa-info-item">
+        <span>Data</span>
+        <strong>{{ frequencia.reuniao.data.strftime('%d/%m/%Y') }}</strong>
+      </div>
+
+      <div class="justificativa-info-item">
+        <span>Status atual</span>
+        <strong class="status-badge">{{ frequencia.status }}</strong>
+      </div>
+    </div>
+
+    <form method="POST" enctype="multipart/form-data" class="justificativa-form">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <div class="form-group">
+        <label for="justificativa">Justificativa</label>
+        <textarea
+          name="justificativa"
+          id="justificativa"
+          class="form-control"
+          rows="5"
+          placeholder="Descreva o motivo da ausência..."
+          required
+        >{{ frequencia.justificativa or '' }}</textarea>
+      </div>
+
+      <div class="form-group">
+        <label for="anexo">Anexo da justificativa</label>
+        <input
+          type="file"
+          name="anexo"
+          id="anexo"
+          class="form-control"
+          accept=".pdf,.jpg,.jpeg,.png,.doc,.docx"
+        >
+        <small class="file-help">
+          Formatos permitidos: PDF, JPG, PNG, DOC e DOCX.
+        </small>
+      </div>
+
+      {% if frequencia.anexo_justificativa %}
+        <div class="anexo-atual">
+          <div>
+            <strong>Anexo atual</strong>
+            <span>Já existe um arquivo enviado para esta justificativa.</span>
+          </div>
+
+          <a href="{{ url_for('static', filename=frequencia.anexo_justificativa) }}" target="_blank">
+            Visualizar anexo
+          </a>
+        </div>
+      {% endif %}
+
+      <div class="form-actions">
+        <a href="{{ url_for('justificativas.minhas_faltas') }}" class="btn-voltar">
+          Voltar
+        </a>
+
+        <button type="submit" class="btn-enviar">
+          Enviar justificativa
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% endblock %}

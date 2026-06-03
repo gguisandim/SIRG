@@ -1,0 +1,493 @@
+{% extends "base.html" %}
+
+{% block title %}Reuniões Cadastradas{% endblock %}
+
+{% block content %}
+
+<style>
+  .page-wide {
+    width: 100%;
+    max-width: 1750px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .page-header-icon {
+    width: 58px;
+    height: 58px;
+    background: linear-gradient(135deg, var(--blue), #3b82f6);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 4px 16px rgba(29,78,216,0.28);
+    flex-shrink: 0;
+  }
+
+  .page-header-text h1 {
+    font-size: 1.7rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.03em;
+    margin: 0;
+  }
+
+  .page-header-text p {
+    font-size: 14px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 4px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark, #ea6c0a));
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13.5px;
+    font-weight: 700;
+    border: none;
+    border-radius: 10px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 3px 14px rgba(249,115,22,0.32);
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+  }
+
+  .btn-primary:hover {
+    opacity: 0.94;
+    transform: translateY(-1px);
+    box-shadow: 0 5px 18px rgba(249,115,22,0.38);
+    color: #fff;
+    text-decoration: none;
+  }
+
+  .table-card {
+    width: 100%;
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    overflow: hidden;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from {
+      opacity: 0;
+      transform: translateY(12px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .table-topbar {
+    padding: 18px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--white);
+    color: var(--text-muted);
+    font-size: 13.5px;
+    font-weight: 500;
+  }
+
+  .table-topbar strong {
+    color: var(--blue);
+    font-weight: 700;
+  }
+
+  .table-wrapper {
+    width: 100%;
+    overflow-x: visible;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  thead th {
+    padding: 15px 18px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg);
+    border-bottom: 1.5px solid var(--border);
+    text-align: left;
+    white-space: normal;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child {
+    border-bottom: none;
+  }
+
+  tbody tr:hover {
+    background: rgba(29,78,216,0.035);
+  }
+
+  tbody td {
+    padding: 18px;
+    font-size: 13.5px;
+    color: var(--text);
+    vertical-align: middle;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  thead th:nth-child(1),
+  tbody td:nth-child(1) {
+    width: 22%;
+  }
+
+  thead th:nth-child(2),
+  tbody td:nth-child(2) {
+    width: 15%;
+  }
+
+  thead th:nth-child(3),
+  tbody td:nth-child(3) {
+    width: 13%;
+  }
+
+  thead th:nth-child(4),
+  tbody td:nth-child(4) {
+    width: 12%;
+  }
+
+  thead th:nth-child(5),
+  tbody td:nth-child(5) {
+    width: 24%;
+  }
+
+  thead th:nth-child(6),
+  tbody td:nth-child(6) {
+    width: 14%;
+  }
+
+  .titulo-cell {
+    font-size: 14.5px;
+    font-weight: 700;
+    color: var(--text);
+    line-height: 1.45;
+    max-width: none;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .data-cell strong {
+    display: block;
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+
+  .data-cell span {
+    font-size: 12.5px;
+    color: var(--text-muted);
+  }
+
+  .tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 6px 12px;
+    border-radius: 999px;
+    font-size: 12.5px;
+    font-weight: 700;
+    white-space: nowrap;
+  }
+
+  .tipo-badge.ordinaria {
+    background: var(--blue-light, #dbeafe);
+    color: var(--blue);
+    border: 1px solid #bfdbfe;
+  }
+
+  .tipo-badge.extraordinaria {
+    background: var(--orange-light, #ffedd5);
+    color: var(--orange);
+    border: 1px solid #fed7aa;
+  }
+
+  .local-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 7px 12px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #475569;
+    white-space: nowrap;
+  }
+
+  .pauta-cell {
+    color: var(--text-muted);
+    line-height: 1.5;
+    max-width: none;
+    white-space: normal;
+    word-break: break-word;
+  }
+
+  .pauta-empty {
+    color: #cbd5e1;
+  }
+
+  .actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .btn-action {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 13px;
+    background: var(--blue-light, #dbeafe);
+    color: var(--blue);
+    border: 1.5px solid #bfdbfe;
+    border-radius: 9px;
+    font-family: 'Sora', sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: background 0.15s, transform 0.15s;
+  }
+
+  .btn-action:hover {
+    background: #dbeafe;
+    color: var(--blue);
+    transform: translateY(-1px);
+    text-decoration: none;
+  }
+
+  .btn-delete {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 8px 13px;
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1.5px solid #fecaca;
+    border-radius: 9px;
+    font-family: 'Sora', sans-serif;
+    font-size: 12.5px;
+    font-weight: 700;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+
+  .empty-state {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 18px;
+    padding: 42px;
+    text-align: center;
+    box-shadow: 0 2px 14px rgba(0,0,0,0.05);
+  }
+
+  .empty-icon {
+    font-size: 38px;
+    margin-bottom: 12px;
+  }
+
+  .empty-state h2 {
+    font-size: 1.15rem;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .empty-state p {
+    color: var(--text-muted);
+    font-size: 13.5px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 720px) {
+    .page-wide {
+      padding: 0 16px;
+    }
+
+    .page-header {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+
+    .page-header-text h1 {
+      font-size: 1.45rem;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+    }
+
+    table {
+      min-width: 900px;
+      table-layout: auto;
+    }
+  }
+</style>
+
+<div class="page-wide">
+  <div class="page-header">
+    <div class="page-header-left">
+      <div class="page-header-icon">🗓️</div>
+
+      <div class="page-header-text">
+        <h1>Reuniões Cadastradas</h1>
+        <p>Acompanhe e gerencie as reuniões do programa.</p>
+      </div>
+    </div>
+
+    <a href="{{ url_for('reunioes.adicionar_reuniao') }}" class="btn-primary">
+      ✚ Nova Reunião
+    </a>
+  </div>
+
+  {% if reunioes %}
+    <div class="table-card">
+      <div class="table-topbar">
+        <strong>{{ reunioes|length }}</strong>
+        {% if reunioes|length == 1 %}
+          reunião encontrada
+        {% else %}
+          reuniões encontradas
+        {% endif %}
+      </div>
+
+      <div class="table-wrapper">
+        <table>
+          <thead>
+            <tr>
+              <th>Título</th>
+              <th>Data / Horário</th>
+              <th>Tipo</th>
+              <th>Local</th>
+              <th>Pauta</th>
+              <th>Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for reuniao in reunioes %}
+              <tr>
+                <td>
+                  <div class="titulo-cell">
+                    {{ reuniao.titulo }}
+                  </div>
+                </td>
+
+                <td>
+                  <div class="data-cell">
+                    <strong>{{ reuniao.data.strftime('%d/%m/%Y') }}</strong>
+                    <span>🕐 {{ reuniao.horario.strftime('%H:%M') }}</span>
+                  </div>
+                </td>
+
+                <td>
+                  {% set tipo_lower = reuniao.tipo|lower %}
+                  <span class="tipo-badge {{ 'ordinaria' if 'ordin' in tipo_lower else 'extraordinaria' }}">
+                    {{ '📋' if 'ordin' in tipo_lower else '⚡' }} {{ reuniao.tipo }}
+                  </span>
+                </td>
+
+                <td>
+                  <span class="local-chip">
+                    📍 {{ reuniao.local }}
+                  </span>
+                </td>
+
+                <td>
+                  <div class="pauta-cell">
+                    {% if reuniao.pauta %}
+                      {{ reuniao.pauta[:90] }}{% if reuniao.pauta|length > 90 %}...{% endif %}
+                    {% else %}
+                      <span class="pauta-empty">Sem pauta cadastrada</span>
+                    {% endif %}
+                  </div>
+                </td>
+
+                <td>
+                  <div class="actions">
+                    <a 
+                      href="{{ url_for('reunioes.editar_reuniao', id=reuniao.id) }}" 
+                      class="btn-action"
+                    >
+                      Editar
+                    </a>
+
+                    <a 
+                      href="{{ url_for('reunioes.detalhes_reuniao', id=reuniao.id) }}" 
+                      class="btn-action"
+                    >
+                      Ver detalhes
+                    </a>
+
+                    <form 
+                      method="POST"
+                      action="{{ url_for('reunioes.excluir_reuniao', id=reuniao.id) }}"
+                      onsubmit="return confirm('Tem certeza que deseja excluir esta reunião?');"
+                    >
+                      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                      <button type="submit" class="btn-delete">
+                        Excluir
+                      </button>
+                    </form>
+                  </div>
+                </td>
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <div class="empty-icon">🗓️</div>
+      <h2>Nenhuma reunião cadastrada</h2>
+      <p>Cadastre a primeira reunião para começar a controlar pauta e frequência.</p>
+
+      <a href="{{ url_for('reunioes.adicionar_reuniao') }}" class="btn-primary">
+        ✚ Cadastrar primeira reunião
+      </a>
+    </div>
+  {% endif %}
+</div>
+
+{% endblock %}

@@ -1,0 +1,862 @@
+{% extends "base.html" %}
+
+{% block title %}Detalhes da Reunião{% endblock %}
+
+{% block content %}
+<style>
+  /* ── Page header ── */
+  .page-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+
+  .page-header-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .page-header-icon {
+    width: 48px; height: 48px;
+    background: linear-gradient(135deg, var(--blue), #3b82f6);
+    border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 2px 10px rgba(29,78,216,0.25);
+    flex-shrink: 0;
+  }
+
+  .page-header-text h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .page-header-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  /* ── Cards ── */
+  .info-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 20px;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  .info-card:nth-child(2) { animation-delay: 0.05s; }
+  .info-card:nth-child(3) { animation-delay: 0.1s; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 16px 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--bg);
+  }
+
+  .card-header-icon {
+    font-size: 16px;
+  }
+
+  .card-header h2,
+  .card-header h3 {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  .card-body {
+    padding: 24px;
+  }
+
+  /* ── Reunião info grid ── */
+  .reuniao-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 20px;
+    letter-spacing: -0.01em;
+  }
+
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 14px;
+    margin-bottom: 24px;
+  }
+
+  .info-item {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+  }
+
+  .info-item .info-label {
+    font-size: 10.5px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+  }
+
+  .info-item .info-value {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+  }
+
+  .tipo-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+
+  .tipo-badge.ordinaria {
+    background: var(--blue-light);
+    color: var(--blue);
+    border: 1px solid #bfdbfe;
+  }
+
+  .tipo-badge.extraordinaria {
+    background: var(--orange-light);
+    color: var(--orange);
+    border: 1px solid #fed7aa;
+  }
+
+  .local-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: #f1f5f9;
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 3px 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+  }
+
+  /* Pauta section */
+  .pauta-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 0 20px;
+  }
+
+  .pauta-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 10px;
+  }
+
+  .pauta-text {
+    font-size: 14px;
+    color: var(--text);
+    line-height: 1.7;
+    font-weight: 300;
+    white-space: pre-wrap;
+  }
+
+  .pauta-empty {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-style: italic;
+    font-weight: 300;
+  }
+
+  /* ── Frequency table ── */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  thead th {
+    padding: 11px 16px;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    background: var(--bg);
+    border-bottom: 1.5px solid var(--border);
+    text-align: left;
+    white-space: nowrap;
+  }
+
+  tbody tr {
+    border-bottom: 1px solid var(--border);
+    transition: background 0.15s;
+  }
+
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: var(--blue-light); }
+
+  tbody td {
+    padding: 13px 16px;
+    font-size: 13px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  /* Avatar + name */
+  .cell-nome {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+  }
+
+  .avatar {
+    width: 32px; height: 32px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--blue-light), #bfdbfe);
+    border: 1.5px solid #bfdbfe;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--blue);
+    flex-shrink: 0;
+  }
+
+  .nome-text { font-weight: 600; }
+
+  /* Status select */
+  .status-select {
+    padding: 6px 30px 6px 10px;
+    font-family: 'Sora', sans-serif;
+    font-size: 12.5px;
+    font-weight: 600;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: var(--bg);
+    color: var(--text);
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+  }
+
+  .status-select:focus { border-color: var(--blue); }
+
+  /* Linha pesquisa tag */
+  .linha-tag {
+    display: inline-block;
+    background: #f8fafc;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 2px 8px;
+    font-size: 12px;
+    color: var(--text-muted);
+  }
+
+  /* Justificativa preview */
+  .just-text {
+    font-size: 12.5px;
+    color: var(--text-muted);
+    font-weight: 300;
+  }
+
+  /* Save btn */
+  .save-row {
+    padding: 16px 24px;
+    border-top: 1px solid var(--border);
+    background: var(--bg);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    padding: 10px 22px;
+    background: linear-gradient(135deg, var(--orange), #ea6c0a);
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 2px 10px rgba(249,115,22,0.28);
+  }
+
+  .btn-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(249,115,22,0.35);
+    color: #fff;
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: none;
+    color: var(--text-muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg);
+    color: var(--text);
+    text-decoration: none;
+  }
+
+  .btn-delete {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 20px;
+    background: none;
+    color: #ef4444;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1.5px solid #fecaca;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.15s, border-color 0.15s;
+  }
+
+  .btn-delete:hover {
+    background: #fef2f2;
+    border-color: #ef4444;
+  }
+
+  /* ── Bottom actions ── */
+  .bottom-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+    animation: fadeUp 0.4s 0.15s ease both;
+  }
+
+  /* Empty states */
+  .empty-msg {
+    padding: 32px 24px;
+    text-align: center;
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    font-style: italic;
+  }
+
+  /* Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,23,42,0.45);
+    backdrop-filter: blur(4px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .modal-overlay.open { display: flex; }
+
+  .modal-box {
+    background: var(--white);
+    border-radius: 16px;
+    padding: 32px;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.18);
+    animation: fadeUp 0.25s ease both;
+    text-align: center;
+  }
+
+  .modal-icon { font-size: 40px; margin-bottom: 12px; }
+  .modal-box h3 { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+  .modal-box p { font-size: 13px; color: var(--text-muted); font-weight: 300; line-height: 1.6; margin-bottom: 24px; }
+  .modal-actions { display: flex; gap: 10px; justify-content: center; }
+
+  .modal-confirm {
+    padding: 10px 22px;
+    background: #ef4444;
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  .modal-confirm:hover { opacity: 0.88; }
+
+  .modal-cancel {
+    padding: 10px 22px;
+    background: none;
+    color: var(--text-muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .modal-cancel:hover { background: var(--bg); }
+
+  @media (max-width: 640px) {
+    .info-grid { grid-template-columns: 1fr 1fr; }
+    thead th:nth-child(3), tbody td:nth-child(3) { display: none; }
+    thead th:nth-child(5), tbody td:nth-child(5) { display: none; }
+  }
+</style>
+
+<!-- Page header -->
+<div class="page-header">
+  <div class="page-header-left">
+    <div class="page-header-icon">📅</div>
+    <div class="page-header-text">
+      <h1>Detalhes da Reunião</h1>
+      <p>Informações completas e controle de frequência.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ── Card 1: Info da Reunião ── -->
+<div class="info-card">
+  <div class="card-header">
+    <span class="card-header-icon">📋</span>
+    <h2>Informações</h2>
+  </div>
+  <div class="card-body">
+    <p class="reuniao-title">{{ reuniao.titulo }}</p>
+
+    <div class="info-grid">
+      <div class="info-item">
+        <div class="info-label">📆 Data</div>
+        <div class="info-value">{{ reuniao.data.strftime('%d/%m/%Y') }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">🕐 Horário</div>
+        <div class="info-value">{{ reuniao.horario.strftime('%H:%M') }}</div>
+      </div>
+      <div class="info-item">
+        <div class="info-label">🏷 Tipo</div>
+        <div class="info-value">
+          {% set tipo_lower = reuniao.tipo|lower %}
+          <span class="tipo-badge {{ 'ordinaria' if 'ordin' in tipo_lower else 'extraordinaria' }}">
+            {{ '📋' if 'ordin' in tipo_lower else '⚡' }} {{ reuniao.tipo }}
+          </span>
+        </div>
+      </div>
+      <div class="info-item">
+  <div class="info-label">🔢 Nº Ofício</div>
+  <div class="info-value">
+    {% if reuniao.numero_oficio %}
+      {{ reuniao.numero_oficio }}/{{ reuniao.data.year }}
+    {% else %}
+      —
+    {% endif %}
+  </div>
+</div>
+      <div class="info-item">
+        <div class="info-label">📍 Local</div>
+        <div class="info-value">
+          <span class="local-chip">{{ reuniao.local }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="pauta-divider"></div>
+    <p class="pauta-label">📝 Pauta da Reunião</p>
+    {% if reuniao.pauta %}
+      <p class="pauta-text">{{ reuniao.pauta }}</p>
+    {% else %}
+      <p class="pauta-empty">Nenhuma pauta cadastrada para esta reunião.</p>
+    {% endif %}
+  </div>
+</div>
+
+<!-- ── Card 2: Frequência ── -->
+<div class="info-card">
+  <div class="card-header">
+    <span class="card-header-icon">✅</span>
+    <h3>Frequência dos Professores/Técnicos</h3>
+  </div>
+
+  {% if professores %}
+    <form method="POST" id="form-frequencia">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+      <table>
+        <thead>
+          <tr>
+            <th>Professor/Técnico</th>
+            <th>Email</th>
+            <th>Linha de Pesquisa</th>
+            <th>Status</th>
+            <th>Justificativa</th>
+            <th>Remover</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {% for professor in professores %}
+            {% set frequencia = frequencias_por_membro.get(professor.id) %}
+
+            {% if frequencia and not frequencia.removido %}
+              <tr>
+                <td>
+                  <div class="cell-nome">
+                    <div class="avatar">{{ professor.nome[0]|upper }}</div>
+                    <span class="nome-text">{{ professor.nome }}</span>
+                  </div>
+                </td>
+
+                <td style="color: var(--text-muted); font-size:12.5px;">
+                  {{ professor.email }}
+                </td>
+
+                <td>
+                  {% if professor.linha_de_pesquisa %}
+                    <span class="linha-tag">{{ professor.linha_de_pesquisa }}</span>
+                  {% else %}
+                    <span style="color:#cbd5e1;">—</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <select class="status-select" name="status_{{ professor.id }}">
+                    <option value="ausente" {% if frequencia.status == 'ausente' %}selected{% endif %}>❌ Ausente</option>
+                    <option value="presente" {% if frequencia.status == 'presente' %}selected{% endif %}>✅ Presente</option>
+                    <option value="justificado" {% if frequencia.status == 'justificado' %}selected{% endif %}>📋 Justificado</option>
+                  </select>
+                </td>
+
+                <td>
+                  {% if frequencia.justificativa %}
+                    <span class="just-text">{{ frequencia.justificativa }}</span>
+                  {% else %}
+                    <span style="color:#cbd5e1;">—</span>
+                  {% endif %}
+                </td>
+
+                <td>
+                  <button
+                    type="submit"
+                    form="form-remover-{{ frequencia.id }}"
+                    class="btn-delete"
+                    onclick="return confirm('Remover este participante desta reunião?');"
+                  >
+                    Remover
+                  </button>
+                </td>
+              </tr>
+            {% endif %}
+          {% endfor %}
+        </tbody>
+      </table>
+
+      <div class="save-row">
+        <button type="submit" class="btn-primary">💾 Salvar Frequência</button>
+      </div>
+    </form>
+
+    {% for professor in professores %}
+      {% set frequencia = frequencias_por_membro.get(professor.id) %}
+
+      {% if frequencia and not frequencia.removido %}
+        <form
+          id="form-remover-{{ frequencia.id }}"
+          method="POST"
+          action="{{ url_for('reunioes.remover_frequencia_reuniao', reuniao_id=reuniao.id, frequencia_id=frequencia.id) }}"
+          style="display:none;"
+        >
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        </form>
+      {% endif %}
+    {% endfor %}
+
+  {% else %}
+    <p class="empty-msg">Nenhum professor ou técnico cadastrado no sistema.</p>
+  {% endif %}
+</div>
+
+<!-- ── Card 3: Justificativas ── -->
+<table>
+  <thead>
+    <tr>
+      <th>Professor</th>
+      <th>Justificativa</th>
+      <th>Atestado</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for frequencia in justificativas %}
+    <tr>
+      <td>
+        <div class="cell-nome">
+          <div class="avatar">{{ frequencia.membro.nome[0]|upper }}</div>
+          <span class="nome-text">{{ frequencia.membro.nome }}</span>
+        </div>
+      </td>
+
+      <td>
+        <span class="just-text">
+          {{ frequencia.justificativa or "—" }}
+        </span>
+      </td>
+
+      <td>
+        {% if frequencia.anexo_justificativa %}
+          <a
+            href="{{ url_for('static', filename=frequencia.anexo_justificativa) }}"
+            target="_blank"
+            class="btn-ver-atestado"
+          >
+            📎 Ver atestado
+          </a>
+        {% else %}
+          <span class="empty-dash">—</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<div class="info-card">
+  <div class="card-header">
+    <span class="card-header-icon">📝</span>
+    <h3>Ata da Reunião</h3>
+  </div>
+
+  <form method="POST" action="{{ url_for('reunioes.salvar_ata', id=reuniao.id) }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+
+    <div class="card-body">
+      <textarea id="campo-ata" name="ata" rows="12" class="form-control">{{ reuniao.ata or '' }}</textarea>
+    </div>
+
+    <div class="save-row">
+      <button type="submit" class="btn-primary">
+        💾 Salvar Ata
+      </button>
+
+      <button type="button" id="btn-gerar-ata-ia" class="btn-secondary">
+        🤖 Gerar ata com IA
+      </button>
+
+        <a 
+        href="{{ url_for('reunioes.visualizar_ata', id=reuniao.id) }}" 
+        class="btn-secondary"
+        target="_blank"
+      >
+        📄 Visualizar Ata Salva
+      </a>
+
+      <a href="{{ url_for('reunioes.baixar_ata_word', id=reuniao.id) }}" class="btn-secondary">
+        📝 Baixar Ata Word
+      </a>
+    </div>
+  </form>
+</div>
+
+<!-- ── Bottom actions ── -->
+<div class="bottom-actions">
+  <a href="{{ url_for('reunioes.editar_reuniao', id=reuniao.id) }}" class="btn-primary">
+    ✏️ Editar Reunião
+  </a>
+
+  <a href="{{ url_for('reunioes.gerar_pauta_reuniao', id=reuniao.id) }}" class="btn-primary" target="_blank">
+    📄 Gerar pauta em PDF
+  </a>
+
+  <a href="{{ url_for('reunioes.visualizar_pauta', id=reuniao.id) }}" class="btn-secondary" target="_blank">
+    👁 Visualizar pauta
+  </a>
+  
+  <a href="{{ url_for('reunioes.baixar_pauta_word', id=reuniao.id) }}" class="btn-secondary">
+  📝 Baixar Pauta Word
+  </a>
+
+  <form 
+    method="POST" 
+    action="{{ url_for('reunioes.enviar_pauta_por_email', id=reuniao.id) }}"
+    onsubmit="return confirm('Deseja enviar o link da pauta para todos os e-mails cadastrados?');"
+  >
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <button type="submit" class="btn-primary">
+      📧 Enviar pauta por e-mail
+    </button>
+  </form>
+
+  {% if reuniao.justificativas_encerradas %}
+    <form method="POST" action="{{ url_for('reunioes.reabrir_justificativas', id=reuniao.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn-secondary">
+        🔓 Reabrir justificativas
+      </button>
+    </form>
+  {% else %}
+    <form method="POST" action="{{ url_for('reunioes.encerrar_justificativas', id=reuniao.id) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <button type="submit" class="btn-delete">
+        🔒 Encerrar justificativas
+      </button>
+    </form>
+  {% endif %}
+
+  <button class="btn-delete" onclick="document.getElementById('deleteModal').classList.add('open')">
+    🗑 Excluir Reunião
+  </button>
+
+  <a href="{{ url_for('reunioes.listar_reunioes') }}" class="btn-secondary">
+    ← Voltar para Reuniões
+  </a>
+</div>
+
+<!-- Modal de confirmação -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal-box">
+    <div class="modal-icon">⚠️</div>
+    <h3>Excluir reunião?</h3>
+    <p>Tem certeza que deseja excluir a reunião <strong>"{{ reuniao.titulo }}"</strong>? Esta ação não pode ser desfeita.</p>
+    <div class="modal-actions">
+      <button class="modal-cancel" onclick="document.getElementById('deleteModal').classList.remove('open')">Cancelar</button>
+      <form method="POST" action="{{ url_for('reunioes.excluir_reuniao', id=reuniao.id) }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <button type="submit" class
+        ="modal-confirm">Sim, excluir</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('deleteModal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('open');
+  });
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const botaoAta = document.getElementById("btn-gerar-ata-ia");
+    const campoAta = document.getElementById("campo-ata");
+
+    if (!botaoAta || !campoAta) {
+      return;
+    }
+
+    botaoAta.addEventListener("click", async function () {
+      botaoAta.disabled = true;
+      botaoAta.innerText = "Gerando ata...";
+
+      const presentes = [];
+      const justificativas = [];
+
+      document.querySelectorAll(".status-select").forEach(function (select) {
+        const linha = select.closest("tr");
+        const nome = linha.querySelector(".nome-text")?.innerText?.trim();
+        const status = select.value;
+
+        if (!nome || !status) return;
+
+        if (status === "presente") {
+          presentes.push(nome);
+        }
+
+        if (status === "justificado") {
+          const just = linha.querySelector(".just-text")?.innerText?.trim();
+
+          if (just && just !== "—") {
+            justificativas.push(`${nome}: ${just}`);
+          } else {
+            justificativas.push(nome);
+          }
+        }
+      });
+
+      const dados = {
+        pauta: `{{ reuniao.pauta or '' }}`,
+        presentes: presentes.join("; "),
+        justificativas: justificativas.join("; "),
+        anotacoes: campoAta.value || ""
+      };
+
+      console.log("PRESENTES ENVIADOS:", dados.presentes);
+      console.log("JUSTIFICATIVAS ENVIADAS:", dados.justificativas);
+
+      try {
+        const resposta = await fetch("{{ url_for('reunioes.gerar_ata_ia', id=reuniao.id) }}", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": "{{ csrf_token() }}"
+          },
+          body: JSON.stringify(dados)
+        });
+
+        const resultado = await resposta.json();
+
+        if (!resposta.ok || !resultado.sucesso) {
+          alert("Erro: " + (resultado.erro || "Não foi possível gerar a ata."));
+          return;
+        }
+
+        campoAta.value = resultado.texto;
+
+      } catch (erro) {
+        console.error(erro);
+        alert("Erro ao conectar com a IA.");
+      } finally {
+        botaoAta.disabled = false;
+        botaoAta.innerText = "🤖 Gerar ata com IA";
+      }
+    });
+  });
+</script>
+
+{% endblock %}

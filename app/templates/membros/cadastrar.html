@@ -1,0 +1,350 @@
+<!-- app/templates/membros/cadastrar.html -->
+{% extends "base.html" %}
+
+{% block title %}Cadastrar Membro{% endblock %}
+
+{% block content %}
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin: 0 auto 32px;
+    max-width: 620px;
+    width: 100%;
+  }
+
+  .page-header-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--blue), #3b82f6);
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 2px 10px rgba(29,78,216,0.25);
+  }
+
+  .page-header-text h1 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .page-header-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    font-weight: 300;
+    margin-top: 2px;
+  }
+
+  .form-card {
+  background: var(--white);
+  border: 1.5px solid var(--border);
+  border-radius: 16px;
+  padding: 36px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+  max-width: 620px;
+  width: 100%;
+  margin: 0 auto;
+  animation: fadeUp 0.4s ease both;
+}
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .field-group {
+    margin-bottom: 20px;
+  }
+
+  .field-group label {
+    display: block;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 7px;
+    letter-spacing: 0.01em;
+  }
+
+  .field-group input,
+  .field-group select,
+  .field-group textarea {
+    width: 100%;
+    padding: 10px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13.5px;
+    font-weight: 400;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    appearance: none;
+    -webkit-appearance: none;
+  }
+
+  .field-group select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2.5'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    padding-right: 38px;
+    cursor: pointer;
+  }
+
+  .field-group input:focus,
+  .field-group select:focus,
+  .field-group textarea:focus {
+    border-color: var(--blue);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(29,78,216,0.08);
+  }
+
+  .field-group input::placeholder {
+    color: #94a3b8;
+  }
+
+  .field-tip {
+    font-size: 11.5px;
+    color: var(--text-muted);
+    margin-top: 5px;
+    font-weight: 300;
+  }
+
+  .conditional-container {
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transition: max-height 0.35s cubic-bezier(0.4,0,0.2,1), opacity 0.3s ease, margin 0.3s ease;
+    margin-bottom: 0;
+  }
+
+  .conditional-container.visible {
+    max-height: 260px;
+    opacity: 1;
+    margin-bottom: 20px;
+  }
+
+  .form-divider {
+    height: 1px;
+    background: var(--border);
+    margin: 28px 0;
+  }
+
+  .form-section-label {
+    font-size: 12px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 18px;
+  }
+
+  .form-actions {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 11px 24px;
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark, #ea6c0a));
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13.5px;
+    font-weight: 600;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 2px 10px rgba(249,115,22,0.3);
+  }
+
+  .btn-primary:hover {
+    opacity: 0.92;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 16px rgba(249,115,22,0.35);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 11px 20px;
+    background: none;
+    color: var(--text-muted);
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.15s, color 0.15s;
+  }
+
+  .btn-secondary:hover {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  .error-list {
+    background: #fee2e2;
+    color: #991b1b;
+    border: 1px solid #fecaca;
+    border-radius: 9px;
+    padding: 10px 14px;
+    font-size: 12.5px;
+    margin-bottom: 20px;
+  }
+
+  .error-list ul {
+    margin: 6px 0 0 18px;
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-icon">👤</div>
+  <div class="page-header-text">
+    <h1>Cadastrar Membro</h1>
+    <p>Preencha os dados para adicionar professor, discente ou técnico ao sistema.</p>
+  </div>
+</div>
+
+<div class="form-card">
+  <form method="POST">
+    {{ form.hidden_tag() }}
+
+    {% if form.errors %}
+      <div class="error-list">
+        <strong>Verifique os campos abaixo:</strong>
+        <ul>
+          {% for field, errors in form.errors.items() %}
+            {% for error in errors %}
+              <li>{{ error }}</li>
+            {% endfor %}
+          {% endfor %}
+        </ul>
+      </div>
+    {% endif %}
+
+    <p class="form-section-label">Dados principais</p>
+
+    <div class="field-group">
+      {{ form.nome.label }}
+      {{ form.nome(placeholder="Nome completo") }}
+      <p class="field-tip">O nome será salvo automaticamente em maiúsculo e sem acentos.</p>
+    </div>
+
+    <div class="field-group">
+      {{ form.email.label }}
+      {{ form.email(placeholder="email@exemplo.com") }}
+    </div>
+
+
+    <div id="professorContainer" class="conditional-container">
+      <p class="form-section-label">Dados do professor</p>
+
+      <div class="field-group">
+        {{ form.linha_de_pesquisa.label }}
+        {{ form.linha_de_pesquisa(id="linha_de_pesquisa") }}
+      </div>
+
+      <div class="field-group" style="margin-bottom:0;">
+        {{ form.siap.label }}
+        {{ form.siap(id="siap", placeholder="Informe o SIAP do professor") }}
+      </div>
+    </div>
+
+    <div id="discenteContainer" class="conditional-container">
+      <p class="form-section-label">Dados do discente</p>
+
+      <div class="field-group" style="margin-bottom:0;">
+        {{ form.nivel_discente.label }}
+        {{ form.nivel_discente(id="nivel_discente") }}
+      </div>
+    </div>
+
+    <div class="form-divider"></div>
+
+    <div class="form-actions">
+      <button type="submit" class="btn-primary">
+        ✚ Cadastrar Membro
+      </button>
+
+      <a href="{{ url_for('membros.listar_membros') }}" class="btn-secondary">
+        ← Cancelar
+      </a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const tipoSelect = document.getElementById('tipo');
+
+  const professorContainer = document.getElementById('professorContainer');
+  const discenteContainer = document.getElementById('discenteContainer');
+
+  const linhaPesquisaSelect = document.getElementById('linha_de_pesquisa');
+  const siapInput = document.getElementById('siap');
+  const nivelDiscenteSelect = document.getElementById('nivel_discente');
+
+  const nomeInput = document.querySelector('input[name="nome"]');
+
+  function normalizarNomeVisual(valor) {
+    return valor
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toUpperCase()
+      .replace(/\s+/g, ' ');
+  }
+
+  function atualizarCamposPorTipo() {
+    const tipo = tipoSelect.value;
+
+    professorContainer.classList.remove('visible');
+    discenteContainer.classList.remove('visible');
+
+    linhaPesquisaSelect.disabled = true;
+    siapInput.disabled = true;
+    nivelDiscenteSelect.disabled = true;
+
+    if (tipo !== 'professor') {
+      linhaPesquisaSelect.value = '';
+      siapInput.value = '';
+    }
+
+    if (tipo !== 'discente') {
+      nivelDiscenteSelect.value = '';
+    }
+
+    if (tipo === 'professor') {
+      professorContainer.classList.add('visible');
+      linhaPesquisaSelect.disabled = false;
+      siapInput.disabled = false;
+    }
+
+    if (tipo === 'discente') {
+      discenteContainer.classList.add('visible');
+      nivelDiscenteSelect.disabled = false;
+    }
+  }
+
+  tipoSelect.addEventListener('change', atualizarCamposPorTipo);
+
+  nomeInput.addEventListener('blur', function () {
+    nomeInput.value = normalizarNomeVisual(nomeInput.value.trim());
+  });
+
+  atualizarCamposPorTipo();
+</script>
+
+{% endblock %}

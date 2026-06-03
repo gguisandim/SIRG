@@ -1,0 +1,117 @@
+{% extends "relatorios/pdf/base_pdf.html" %}
+
+{% block titulo_pdf %}
+Relatório de Bancas
+{% endblock %}
+
+{% block corpo_pdf %}
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <span>Total de bancas</span>
+    <strong>{{ total_bancas }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Com pendências</span>
+    <strong>{{ bancas_com_pendencias|length }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Convite pendente</span>
+    <strong>{{ bancas_com_convite_pendente|length }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Período</span>
+    <strong>{{ ano }}</strong>
+  </div>
+</div>
+
+<h2>Bancas cadastradas</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Horário</th>
+      <th>Responsável</th>
+      <th>Orientador</th>
+      <th>Sala</th>
+      <th>Nível</th>
+      <th>Drive</th>
+      <th>Site</th>
+      <th>Convite</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for banca in bancas %}
+      <tr>
+        <td>{{ banca.data.strftime('%d/%m/%Y') }}</td>
+        <td>{{ banca.horario.strftime('%H:%M') }}</td>
+        <td>{{ banca.responsavel_banca }}</td>
+        <td>{{ banca.orientador }}</td>
+        <td>{{ banca.sala or '-' }}</td>
+        <td>{{ banca.nivel }}</td>
+
+        <td>
+          {% if banca.drive_status == 'OK' %}
+            <span class="badge ok">OK</span>
+          {% elif banca.drive_status == 'erro' %}
+            <span class="badge erro">Erro</span>
+          {% else %}
+            <span class="badge pendente">Pendente</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if banca.site_status == 'OK' %}
+            <span class="badge ok">OK</span>
+          {% elif banca.site_status == 'erro' %}
+            <span class="badge erro">Erro</span>
+          {% else %}
+            <span class="badge pendente">Pendente</span>
+          {% endif %}
+        </td>
+
+        <td>
+          {% if banca.convite_enviado %}
+            <span class="badge ok">Enviado</span>
+          {% else %}
+            <span class="badge pendente">Pendente</span>
+          {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+<h2>Bancas com pendências</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Data</th>
+      <th>Responsável</th>
+      <th>Pendência</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    {% for banca in bancas_com_pendencias %}
+      <tr>
+        <td>{{ banca.data.strftime('%d/%m/%Y') }}</td>
+        <td>{{ banca.responsavel_banca }}</td>
+        <td>
+          {% if banca.drive_status != 'OK' %}Drive pendente. {% endif %}
+          {% if banca.site_status != 'OK' %}Site pendente. {% endif %}
+          {% if banca.erro_sigaa %}Erro SIGAA: {{ banca.erro_sigaa }}. {% endif %}
+          {% if not banca.convite_enviado %}Convite pendente. {% endif %}
+        </td>
+      </tr>
+    {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}

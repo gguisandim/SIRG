@@ -1,0 +1,378 @@
+{% extends "base.html" %}
+
+{% block title %}Verificar Frequência{% endblock %}
+
+{% block content %}
+
+<style>
+  .page-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 28px;
+  }
+
+  .page-header-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, var(--blue), #3b82f6);
+    border-radius: 13px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 22px;
+    box-shadow: 0 2px 10px rgba(29,78,216,0.25);
+  }
+
+  .page-header-text h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.02em;
+  }
+
+  .page-header-text p {
+    font-size: 13px;
+    color: var(--text-muted);
+    margin-top: 3px;
+  }
+
+  .summary-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .summary-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 14px;
+    padding: 18px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+  }
+
+  .summary-card span {
+    display: block;
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+
+  .summary-card strong {
+    font-size: 1.6rem;
+    color: var(--text);
+  }
+
+  .filter-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    margin-bottom: 24px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+  }
+
+  .filter-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 14px;
+  }
+
+  .filter-group label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+  }
+
+  .filter-group input,
+  .filter-group select {
+    width: 100%;
+    padding: 9px 12px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    color: var(--text);
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 9px;
+    outline: none;
+  }
+
+  .filter-actions {
+    display: flex;
+    gap: 10px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+  }
+
+  .table-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 22px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    overflow-x: auto;
+  }
+
+  .table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+  }
+
+  .table th {
+    text-align: left;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 12px;
+    border-bottom: 1.5px solid var(--border);
+    white-space: nowrap;
+  }
+
+  .table td {
+    padding: 12px;
+    border-bottom: 1px solid var(--border);
+    font-size: 13px;
+    color: var(--text);
+    vertical-align: middle;
+  }
+
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px 10px;
+    border-radius: 999px;
+    font-size: 11.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .badge-presente {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .badge-ausente {
+    background: #fee2e2;
+    color: #991b1b;
+  }
+
+  .badge-justificado {
+    background: #dbeafe;
+    color: #1d4ed8;
+  }
+
+  .btn-primary {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    background: linear-gradient(135deg, var(--orange), var(--orange-dark, #ea6c0a));
+    color: #fff;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border: none;
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+    box-shadow: 0 2px 10px rgba(249,115,22,0.3);
+  }
+
+  .btn-secondary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 9px 14px;
+    font-family: 'Sora', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    border-radius: 9px;
+    cursor: pointer;
+    text-decoration: none;
+    border: 1.5px solid var(--border);
+    background: var(--white);
+    color: var(--text);
+  }
+
+  .empty-state {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 36px;
+    text-align: center;
+    color: var(--text-muted);
+  }
+
+  .justificativa-cell {
+    max-width: 320px;
+    white-space: normal;
+  }
+
+  @media (max-width: 900px) {
+    .summary-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .filter-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+
+  @media (max-width: 600px) {
+    .filter-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="page-header">
+  <div class="page-header-icon">✅</div>
+
+  <div class="page-header-text">
+    <h1>Verificar Frequência</h1>
+    <p>Consulte a frequência dos professores por reunião, status e justificativas.</p>
+  </div>
+</div>
+
+<div class="summary-grid">
+  <div class="summary-card">
+    <span>Presentes</span>
+    <strong>{{ total_presentes }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Ausentes</span>
+    <strong>{{ total_ausentes }}</strong>
+  </div>
+
+  <div class="summary-card">
+    <span>Justificados</span>
+    <strong>{{ total_justificados }}</strong>
+  </div>
+</div>
+
+<form method="GET" class="filter-card">
+  <div class="filter-grid">
+    <div class="filter-group">
+      <label for="busca">Buscar</label>
+      <input
+        type="text"
+        id="busca"
+        name="busca"
+        value="{{ request.args.get('busca', '') }}"
+        placeholder="Professor, e-mail ou reunião"
+      >
+    </div>
+
+    <div class="filter-group">
+      <label for="membro_id">Professor</label>
+      <select id="membro_id" name="membro_id">
+        <option value="">Todos</option>
+        {% for professor in professores %}
+          <option 
+            value="{{ professor.id }}"
+            {% if request.args.get('membro_id') == professor.id|string %}selected{% endif %}
+          >
+            {{ professor.nome }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="reuniao_id">Reunião</label>
+      <select id="reuniao_id" name="reuniao_id">
+        <option value="">Todas</option>
+        {% for reuniao in reunioes %}
+          <option 
+            value="{{ reuniao.id }}"
+            {% if request.args.get('reuniao_id') == reuniao.id|string %}selected{% endif %}
+          >
+            {{ reuniao.titulo }} - {{ reuniao.data.strftime('%d/%m/%Y') }}
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="filter-group">
+      <label for="status">Status</label>
+      <select id="status" name="status">
+        <option value="">Todos</option>
+        <option value="presente" {% if request.args.get('status') == 'presente' %}selected{% endif %}>Presente</option>
+        <option value="ausente" {% if request.args.get('status') == 'ausente' %}selected{% endif %}>Ausente</option>
+        <option value="justificado" {% if request.args.get('status') == 'justificado' %}selected{% endif %}>Justificado</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="filter-actions">
+    <button type="submit" class="btn-primary">
+      Buscar
+    </button>
+
+    <a href="{{ url_for('frequencias.listar_frequencias') }}" class="btn-secondary">
+      Limpar filtros
+    </a>
+  </div>
+</form>
+
+{% if frequencias %}
+  <div class="table-card">
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Professor</th>
+          <th>E-mail</th>
+          <th>Reunião</th>
+          <th>Data</th>
+          <th>Horário</th>
+          <th>Status</th>
+          <th>Justificativa</th>
+        </tr>
+      </thead>
+
+      <tbody>
+        {% for frequencia in frequencias %}
+          <tr>
+            <td>{{ frequencia.membro.nome }}</td>
+            <td>{{ frequencia.membro.email }}</td>
+            <td>{{ frequencia.reuniao.titulo }}</td>
+            <td>{{ frequencia.reuniao.data.strftime('%d/%m/%Y') }}</td>
+            <td>{{ frequencia.reuniao.horario.strftime('%H:%M') }}</td>
+
+            <td>
+              {% if frequencia.status == 'presente' %}
+                <span class="badge badge-presente">Presente</span>
+              {% elif frequencia.status == 'justificado' %}
+                <span class="badge badge-justificado">Justificado</span>
+              {% else %}
+                <span class="badge badge-ausente">Ausente</span>
+              {% endif %}
+            </td>
+
+            <td class="justificativa-cell">
+              {% if frequencia.justificativa %}
+                {{ frequencia.justificativa }}
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <div class="empty-state">
+    <p>Nenhuma frequência encontrada.</p>
+    <br>
+    <p>A frequência deve ser marcada dentro dos detalhes de cada reunião.</p>
+  </div>
+{% endif %}
+
+{% endblock %}

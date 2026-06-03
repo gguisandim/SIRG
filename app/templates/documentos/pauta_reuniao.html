@@ -1,0 +1,115 @@
+{% extends "documentos/base_pdf.html" %}
+
+{% block titulo_pdf %}{% endblock %}
+
+{% block corpo_pdf %}
+
+<style>
+  .documento-oficio {
+    font-size: 13px;
+    color: #111;
+    line-height: 1.45;
+  }
+
+  .linha-documento {
+    width: 100%;
+    margin-bottom: 24px;
+    text-align: right;
+    font-size: 14px;
+  }
+
+  .bloco-info {
+    margin-bottom: 20px;
+  }
+
+  .bloco-info p {
+    margin: 0 0 3px 0;
+  }
+
+  .assunto {
+    margin: 18px 0 22px 0;
+  }
+
+  .paragrafo {
+    text-align: justify;
+    margin-bottom: 14px;
+  }
+
+  .pauta {
+    margin-top: 22px;
+    text-align: justify;
+  }
+
+  .pauta h2 {
+    border: none;
+    color: #111;
+    font-size: 14px;
+    margin: 18px 0 8px 0;
+    padding: 0;
+  }
+
+  .pauta-item {
+    margin-bottom: 14px;
+    text-align: justify;
+  }
+
+  .assinatura {
+    margin-top: 48px;
+    text-align: center;
+  }
+
+  .assinatura-linha {
+    width: 260px;
+    border-top: 1px solid #111;
+    margin: 0 auto 6px auto;
+  }
+</style>
+
+<div class="documento-oficio">
+  <div class="linha-documento">
+    Belém, {{ data_emissao_extenso|default(gerado_em.strftime('%d/%m/%Y')) }}.
+  </div>
+
+  <div class="bloco-info">
+    <p><strong>Da:</strong> Coordenação do PPEB</p>
+    <p><strong>Para:</strong> Membros do Colegiado do PPEB</p>
+  </div>
+
+  <div class="assunto">
+    <p>
+      <strong>Assunto:</strong>
+      {{ reuniao.titulo }} – Convocatória
+    </p>
+  </div>
+
+  <p class="paragrafo">
+    Prezados(as) Membros,
+  </p>
+
+  <p class="paragrafo">
+    Convocamos a todos/as para
+    <strong>{{ reuniao.titulo }}</strong>, a ser realizada no dia
+    <strong>{{ data_reuniao_extenso|default(reuniao.data.strftime('%d/%m/%Y')) }}</strong>,
+    às <strong>{{ reuniao.horario.strftime('%H:%M') }}</strong>,
+    no(a) <strong>{{ reuniao.local }}</strong>,
+    para tratar da seguinte pauta:
+  </p>
+
+  <div class="pauta">
+    {% if reuniao.pauta %}
+      {{ reuniao.pauta|replace('\n', '<br>')|safe }}
+    {% else %}
+      <p class="pauta-item">Pauta não informada.</p>
+    {% endif %}
+  </div>
+
+  <div class="assinatura">
+    <div class="assinatura-linha"></div>
+    <p>
+      Coordenação do PPEB<br>
+      Programa de Pós-Graduação em Currículo e Gestão da Escola Básica
+    </p>
+  </div>
+</div>
+
+{% endblock %}

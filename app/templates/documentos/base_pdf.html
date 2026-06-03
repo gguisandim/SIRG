@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+
+  <style>
+    @page {
+      size: A4;
+      margin: 2cm;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      color: #111;
+      font-size: 12px;
+      line-height: 1.5;
+      
+    }
+
+    .header {
+      padding-bottom: 10px;
+      margin-bottom: 28px;
+    }
+
+    .header-top {
+      display: table;
+      width: 100%;
+      table-layout: fixed;
+      vertical-align: middle;
+    }
+
+    .header-logo,
+    .header-title {
+      display: table-cell;
+      vertical-align: middle;
+    }
+
+    .header-logo {
+      width: 95px;
+      text-align: center;
+    }
+
+    .header-logo img {
+      max-width: 62px;
+      max-height: 62px;
+    }
+
+    .header-title {
+      text-align: center;
+      padding: 0 12px;
+    }
+
+    .header-title .instituicao {
+      margin: 0;
+      font-size: 10px;
+      color: #000;
+      line-height: 1.35;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    .header-title .ppeb-nome {
+      margin: 0;
+      font-size: 10px;
+      color: #000;
+      line-height: 1.35;
+      text-transform: uppercase;
+      font-weight: bold;
+    }
+
+    h2 {
+      font-size: 16px;
+      color: #111;
+      margin-top: 26px;
+      margin-bottom: 10px;
+      border-bottom: 1px solid #e2e8f0;
+      padding-bottom: 6px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 18px;
+    }
+
+    thead {
+      display: table-header-group;
+    }
+
+    tr {
+      page-break-inside: avoid;
+      break-inside: avoid;
+    }
+
+    th {
+      background: #eff6ff;
+      color: #1d4ed8;
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      padding: 7px;
+      border: 1px solid #dbeafe;
+    }
+
+    td {
+      padding: 7px;
+      border: 1px solid #e2e8f0;
+      vertical-align: top;
+    }
+
+    .footer {
+      margin-top: 28px;
+      padding-top: 10px;
+      border-top: 1px solid #e2e8f0;
+      font-size: 10px;
+      color: #64748b;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="header">
+    <div class="header-top">
+      <div class="header-logo">
+        <img src="{{ url_for('static', filename='img/ppeb.png', _external=True) }}" alt="Logo PPEB">
+      </div>
+
+      <div class="header-title">
+        <p class="instituicao">Universidade Federal do Pará</p>
+        <p class="instituicao">Núcleo de Estudos Transdisciplinares em Educação Básica</p>
+        <p class="ppeb-nome">Programa de Pós-Graduação em Currículo e Gestão da Escola Básica</p>
+      </div>
+
+      <div class="header-logo">
+        <img src="{{ url_for('static', filename='img/ufpa.png', _external=True) }}" alt="Logo UFPA">
+      </div>
+    </div>
+  </div>
+
+  {% block corpo_pdf %}{% endblock %}
+
+  <div class="footer">
+    Documento gerado automaticamente pelo Sistema Integrado de Registro e Gestão Acadêmica.
+  </div>
+</body>
+</html>
