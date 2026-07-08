@@ -22,7 +22,7 @@ def login():
     form = LoginForm()
 
     if form.validate_on_submit():
-        usuario = Usuario.query.filter_by(email=form.email.data).first()
+        usuario = Usuario.query.filter_by(email=form.email.data.strip().lower()).first()
 
         if usuario and usuario.check_password(form.senha.data) and usuario.ativo:
             login_user(usuario)
@@ -51,17 +51,17 @@ def cadastrar():
     form = CadastroUsuarioForm()
 
     if form.validate_on_submit():
-        usuario_existente = Usuario.query.filter_by(email=form.email.data).first()
+        usuario_existente = Usuario.query.filter_by(email=form.email.data.strip().lower()).first()
 
         if usuario_existente:
             flash("Já existe um usuário com esse e-mail.", "warning")
             return render_template("usuarios/cadastrar.html", form=form)
 
-        membro = Membro.query.filter_by(email=form.email.data).first()
+        membro = Membro.query.filter_by(email=form.email.data.strip().lower()).first()
 
         usuario = Usuario(
             nome=form.nome.data,
-            email=form.email.data,
+            email=form.email.data.strip().lower(),
             perfil="professor",
             membro_id=membro.id if membro else None
         )
