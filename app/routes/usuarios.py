@@ -72,11 +72,14 @@ def cadastrar():
             return render_template("usuarios/cadastrar.html", form=form)
 
         try:
-            # 1. Criar o utilizador no Firebase
+            # Criar o utilizador no Firebase
             auth = get_firebase_auth()
-            auth.create_user_with_email_and_password(email, senha)
+            user = auth.create_user_with_email_and_password(email, senha)
 
-            # 2. Registar o utilizador na nossa base de dados local
+            # Envia o e-mail de verificação usando o token do usuário recém-criado
+            auth.send_email_verification(user['idToken'])
+
+            # Registar o utilizador na nossa base de dados local
             membro = Membro.query.filter_by(email=email).first()
 
             usuario = Usuario(
@@ -85,17 +88,16 @@ def cadastrar():
                 perfil="professor",
                 membro_id=membro.id if membro else None
             )
-
             usuario.set_password(senha)
 
             db.session.add(usuario)
             db.session.commit()
 
-            flash("Utilizador cadastrado com sucesso! Faça login para continuar.", "success")
+            flash("Utilizador cadastrado com sucesso! Enviamos um link de confirmação para o seu e-mail. Por favor, verifique-o antes de fazer login.", "success")
             return redirect(url_for("usuarios.login"))
 
         except Exception as e:
-            flash("Erro ao cadastrar no Firebase. A palavra-passe pode ser muito fraca (mínimo 6 caracteres) ou o e-mail já existe.", "danger")
+            flash("Erro ao cadastrar no Firebase. Verifique se o e-mail é válido.", "danger")
             print(f"Erro do Firebase: {e}")
 
     return render_template("usuarios/cadastrar.html", form=form)
