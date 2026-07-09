@@ -28,12 +28,10 @@ def login():
         senha = form.senha.data
 
         try:
-            # 1. Tentar fazer login no Firebase
+            # 1. Fazer login no Firebase
             auth = get_firebase_auth()
             user = auth.sign_in_with_email_and_password(email, senha)
 
-            # 2. Se o Firebase não der erro, a senha está correta! 
-            # Agora procuramos o utilizador no nosso banco local para carregar o perfil.
             usuario = Usuario.query.filter_by(email=email).first()
 
             if usuario and usuario.ativo:
@@ -49,8 +47,7 @@ def login():
         except Exception as e:
             # Se o Firebase der erro (senha errada ou utilizador inexistente), cai aqui.
             flash("E-mail ou palavra-passe inválidos.", "danger")
-            print(f"Erro do Firebase: {e}") # Ajudar a ver o erro no terminal
-
+            print(f"Erro do Firebase: {e}")
     return render_template("usuarios/login.html", form=form)
 
 @usuarios.route("/logout")
@@ -89,6 +86,8 @@ def cadastrar():
                 membro_id=membro.id if membro else None
             )
 
+            usuario.set_password(senha)
+
             db.session.add(usuario)
             db.session.commit()
 
@@ -104,6 +103,5 @@ def cadastrar():
 @usuarios.route("/membro/<int:membro_id>/resetar-senha", methods=["POST"])
 @login_required
 def resetar_senha_membro(membro_id):
-    # O ideal seria enviar um e-mail de "Esqueci a minha palavra-passe" pelo Firebase.
     flash("A redefinição de palavra-passe agora é gerida pelo Firebase.", "info")
     return redirect(url_for("membros.listar_membros"))
