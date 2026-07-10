@@ -82,10 +82,9 @@
 
   .form-control {
     width: 100%;
-    min-height: 44px;
     border: 1.5px solid var(--border);
-    border-radius: 12px;
-    padding: 11px 13px;
+    border-radius: 8px;
+    padding: 12px 14px;
     font-family: 'Sora', sans-serif;
     font-size: 14px;
     color: var(--text);
@@ -93,10 +92,15 @@
     transition: border-color 0.15s, box-shadow 0.15s;
   }
 
-  .form-control:focus {
-    border-color: #bfdbfe;
-    box-shadow: 0 0 0 4px rgba(29, 78, 216, 0.08);
-    outline: none;
+  input.form-control:focus {
+    border-color: var(--blue) ;
+    border-width: 2px ;
+    box-shadow: none;
+    outline: none ;
+  }
+  
+  input.form-control:hover{
+    border-color: #666666 ;
   }
 
   .form-help {
