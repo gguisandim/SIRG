@@ -8,6 +8,8 @@ from flask_admin import Admin
 from flask_admin.contrib.sqla import ModelView
 from flask_mail import Mail
 from dotenv import load_dotenv
+from authlib.integrations.flask_client import OAuth
+
 
 
 load_dotenv()
@@ -18,6 +20,7 @@ migrate = Migrate()
 csrf = CSRFProtect()
 login_manager = LoginManager()
 mail = Mail()
+oauth = OAuth()
 
 login_manager.login_view = "usuarios.login"
 login_manager.login_message = "Faça login para acessar o sistema."
@@ -32,6 +35,15 @@ def create_app(config_filename="config.Config"):
     csrf.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+    oauth.init_app(app)
+
+    oauth.register(
+        name = 'google',
+        server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
 
     from .models import Membro, Reuniao, Frequencia, Oficio, Banca, Usuario
 
@@ -68,7 +80,7 @@ def create_app(config_filename="config.Config"):
         if not current_user.is_authenticated:
             return redirect(url_for("usuarios.login"))
 
-        if current_user.perfil == "professor":
+        if current_user.perfil in ["professor" , "aluno"]:
             return redirect(url_for("justificativas.minhas_faltas"))
 
         return redirect(url_for("dashboard"))
@@ -76,7 +88,7 @@ def create_app(config_filename="config.Config"):
     @app.route("/dashboard")
     @login_required
     def dashboard():
-        if current_user.perfil == "professor":
+        if current_user.perfil in ["professor" , "aluno"]:
             return redirect(url_for("justificativas.minhas_faltas"))
 
         return render_template("home.html")

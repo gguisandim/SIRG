@@ -4,6 +4,8 @@ import pyrebase
 from app import db
 from app.models import Usuario, Membro
 from app.forms import LoginForm, CadastroUsuarioForm
+from app import oauth
+import secrets
 
 usuarios = Blueprint("usuarios", __name__, url_prefix="/usuarios")
 
@@ -101,6 +103,50 @@ def cadastrar():
             print(f"Erro do Firebase: {e}")
 
     return render_template("usuarios/cadastrar.html", form=form)
+
+@usuarios.route('/login/google')
+def login_google():
+    redirect_uri = url_for('usuarios.autorizado_google', _external=True)
+    return oauth.google.authorize_redirect(redirect_uri)
+
+
+@usuarios.route('/login/google/autorizado')
+def autorizado_google():
+    token = oauth.google.authorize_access_token()
+    user_info = token.get('userinfo')
+
+    if not user_info:
+        flash('Erro ao tentar fazer login com o Google.', 'danger')
+        return redirect(url_for('usuarios.login'))
+
+    email = user_info.get('email').lower().strip()
+    nome = user_info.get('name')
+
+    usuario = Usuario.query.filter_by(email=email).first()
+
+    if usuario:
+        login_user(usuario)
+        flash(f'Bem-vindo de volta, {nome}!', 'success')
+        
+    else:
+      
+        usuario = Usuario(
+            nome=nome,
+            email=email,
+            perfil='professor', # Perfil padrão que você estava usando
+            ativo=True
+        )
+       
+        senha_aleatoria = secrets.token_urlsafe(16)
+        usuario.set_password(senha_aleatoria)
+        
+        db.session.add(usuario)
+        db.session.commit()
+        
+        login_user(usuario)
+        flash('Sua conta foi criada automaticamente com o Google!', 'success')
+
+    return redirect(url_for('home'))
 
 @usuarios.route("/membro/<int:membro_id>/resetar-senha", methods=["POST"])
 @login_required

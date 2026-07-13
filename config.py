@@ -34,3 +34,6 @@ class Config:
         "appId": os.getenv("FIREBASE_APP_ID"),
         "databaseURL": os.getenv("FIREBASE_DATABASE_URL", "")
     }
+
+    GOOGLE_CLIENT_ID=os.getenv("GOOGLE_CLIENT_ID")
+    GOOGLE_CLIENT_SECRET=os.getenv("GOOGLE_CLIENT_SECRET")

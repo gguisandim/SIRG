@@ -3,7 +3,7 @@ from flask import flash, redirect, url_for
 from flask_login import current_user
 
 
-PERFIS_ADMINISTRATIVOS = ["coordenador", "secretaria", "bolsista"]
+PERFIS_ADMINISTRATIVOS = ["coordenador", "secretaria", "admin"]
 
 
 def perfil_required(*perfis_permitidos):
@@ -16,8 +16,8 @@ def perfil_required(*perfis_permitidos):
             if current_user.perfil not in perfis_permitidos:
                 flash("Você não tem permissão para acessar esta página.", "danger")
 
-                if current_user.perfil == "professor":
-                    return redirect(url_for("frequencias.minhas_faltas"))
+                if current_user.perfil in ["professor" , "aluno"]:
+                    return redirect(url_for("justificativas.minhas_faltas"))
 
                 return redirect(url_for("dashboard"))
 
@@ -37,8 +37,8 @@ def administrativo_required(func):
         if current_user.perfil not in PERFIS_ADMINISTRATIVOS:
             flash("Você não tem permissão para acessar esta página.", "danger")
 
-            if current_user.perfil == "professor":
-                return redirect(url_for("frequencias.minhas_faltas"))
+            if current_user.perfil in ["professor" , "aluno"]:
+                return redirect(url_for("justificativas.minhas_faltas"))
 
             return redirect(url_for("dashboard"))
 
