@@ -4,6 +4,22 @@
 {% block title %}Lista de Membros{% endblock %}
 
 {% block content %}
+
+<style>
+  .btn-editar-suave {
+    color: #0ea5e9;
+    background-color: #ffffff;
+    border: 1px solid #bae6fd; 
+    transition: all 0.2s ease-in-out; 
+  }
+
+  .btn-editar-suave:hover {
+    background-color: #f0f9ff; 
+    border-color: #7dd3fc; 
+    color: #0284c7; 
+  }
+</style>
+
 <style>
   .page-header {
     display: flex;
@@ -593,28 +609,40 @@
                 {% endif %}
               </td>
 
-              <td>
-                <div class="actions-cell">
+<td style="vertical-align: middle;">
+                <div class="actions-cell" style="display: flex; flex-direction: column; gap: 8px; align-items: center; justify-content: center;">
+                  
+                  <!-- 1. EDITAR (Agora usando a nossa classe personalizada) -->
+                  <a href="{{ url_for('membros.editar_membro', id=membro.id) }}" 
+                     class="btn btn-sm btn-editar-suave" 
+                     style="width: 130px; margin: 0; display: flex; justify-content: center; align-items: center; gap: 6px; font-weight: 500;">
+                      ✏️ Editar
+                  </a>
+
+                  <!-- 2. RESETAR SENHA -->
                   <form
                     method="POST"
                     action="{{ url_for('usuarios.resetar_senha_membro', membro_id=membro.id) }}"
                     onsubmit="return confirm('Resetar a senha deste usuário para 123456?');"
+                    style="margin: 0;"
                   >
                     <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
-
-                    <button type="submit" class="btn-secondary">
-                      🔑 Resetar senha
+                    <button type="submit" class="btn-secondary" style="width: 130px; margin: 0; display: flex; justify-content: center; align-items: center; gap: 6px;">
+                      🔑 Resetar
                     </button>
                   </form>
 
+                  <!-- 3. EXCLUIR -->
                   <button
                     class="btn-delete"
                     data-url="{{ url_for('membros.excluir_membro', id=membro.id) }}"
                     data-nome="{{ membro.nome }}"
                     onclick="abrirModal(this.dataset.url, this.dataset.nome)"
+                    style="width: 130px; margin: 0; display: flex; justify-content: center; align-items: center; gap: 6px;"
                   >
-                    🗑 Excluir
+                    🗑️ Excluir
                   </button>
+                  
                 </div>
               </td>
             </tr>

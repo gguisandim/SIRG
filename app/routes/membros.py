@@ -1,5 +1,5 @@
 # app/routes/membros.py
-from flask import Blueprint, render_template, redirect, url_for, request
+from flask import Blueprint, render_template, redirect, url_for, request, flash
 from sqlalchemy import or_
 from app import db
 from app.models import Membro
@@ -100,6 +100,34 @@ def cadastrar_membro():
         return redirect(url_for('membros.listar_membros'))
 
     return render_template('membros/cadastrar.html', form=form)
+
+
+# Rota para editar membro.
+@membros.route('/editar/<int:id>', methods=['GET', 'POST'])
+@login_required
+@administrativo_required
+def editar_membro(id):
+    membro = Membro.query.get_or_404(id)
+    
+    form = CadastroMembroForm(obj=membro)
+    
+    if request.method == 'POST':
+        tipo = request.form.get('tipo')
+        
+        membro.nome = normalizar_nome(request.form.get('nome'))
+        membro.email = request.form.get('email').strip().lower()
+        membro.tipo = tipo
+        
+        membro.linha_de_pesquisa = request.form.get('linha_de_pesquisa') if tipo == 'professor' else None
+        membro.siap = request.form.get('siap').strip() if tipo == 'professor' else None
+        membro.nivel_discente = request.form.get('nivel_discente') if tipo == 'discente' else None
+        
+        db.session.commit()
+        flash('Os dados do membro foram atualizados com sucesso!', 'success')
+        
+        return redirect(url_for('membros.listar_membros'))
+        
+    return render_template('membros/editar.html', form=form, membro=membro)
 
 # Rota para verificar a frequência dos membros
 @membros.route('/verificar_frequencia')

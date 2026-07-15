@@ -66,6 +66,7 @@ def cadastrar():
     if form.validate_on_submit():
         email = form.email.data.strip().lower()
         senha = form.senha.data
+        siap= form.siap.data.strip()
 
         usuario_existente = Usuario.query.filter_by(email=email).first()
 
@@ -74,15 +75,25 @@ def cadastrar():
             return render_template("usuarios/cadastrar.html", form=form)
 
         try:
-            # Criar o utilizador no Firebase
             auth = get_firebase_auth()
             user = auth.create_user_with_email_and_password(email, senha)
 
-            # Envia o e-mail de verificação usando o token do usuário recém-criado
             auth.send_email_verification(user['idToken'])
 
-            # Registar o utilizador na nossa base de dados local
             membro = Membro.query.filter_by(email=email).first()
+
+            if membro and not membro.siap:
+                membro.siap = siap
+
+            if not membro:
+                membro= Membro(
+                    nome=form.nome.data.strip().upper(),
+                    email=email,
+                    tipo="professor",
+                    ativo=True
+                )
+                db.session.add(membro)
+                db.session.flush()
 
             usuario = Usuario(
                 nome=form.nome.data,
@@ -99,6 +110,7 @@ def cadastrar():
             return redirect(url_for("usuarios.login"))
 
         except Exception as e:
+            db.session.rollback()
             flash("Erro ao cadastrar no Firebase. Verifique se o e-mail é válido.", "danger")
             print(f"Erro do Firebase: {e}")
 
@@ -141,6 +153,17 @@ def autorizado_google():
         usuario.set_password(senha_aleatoria)
         
         db.session.add(usuario)
+
+        membro_existente = Membro.query.filter_by(email=email).first()
+        if not membro_existente:
+            novo_membro = Membro(
+                nome=nome.upper(),
+                email=email,
+                tipo='professor',
+                ativo=True
+            )
+            dp.session.add(novo_membro)
+
         db.session.commit()
         
         login_user(usuario)

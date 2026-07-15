@@ -25,6 +25,7 @@ class LoginForm(FlaskForm):
 class CadastroUsuarioForm(FlaskForm):
     nome = StringField("Nome", validators=[DataRequired()])
     email = StringField("E-mail", validators=[DataRequired(), Email()])
+    siap = StringField("SIAP", validators=[DataRequired(message="O SIAP é obrigatório.")])
     senha = PasswordField("Senha", validators=[DataRequired(), Length(min=6)])
     submit = SubmitField("Cadastrar")
 
