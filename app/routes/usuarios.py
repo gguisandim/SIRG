@@ -1,11 +1,13 @@
-from flask import Blueprint, render_template, redirect, url_for, flash, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, current_app, session, request
 from flask_login import login_user, logout_user, login_required, current_user
 import pyrebase
-from app import db
+from app import db, mail
 from app.models import Usuario, Membro
 from app.forms import LoginForm, CadastroUsuarioForm
 from app import oauth
 import secrets
+import random
+from flask_mail import Message
 
 usuarios = Blueprint("usuarios", __name__, url_prefix="/usuarios")
 
@@ -66,7 +68,7 @@ def cadastrar():
     if form.validate_on_submit():
         email = form.email.data.strip().lower()
         senha = form.senha.data
-        siap= form.siap.data.strip()
+        siap= form.siap.data.strip() if form.siap.data else ""
 
         usuario_existente = Usuario.query.filter_by(email=email).first()
 
@@ -74,47 +76,140 @@ def cadastrar():
             flash("Já existe um utilizador com esse e-mail no nosso sistema.", "warning")
             return render_template("usuarios/cadastrar.html", form=form)
 
+        codigo_verificacao = "".join(str(random.randint(0,9)) for _ in range (6))
+
+        session["temp_user"] = {
+            "nome": form.nome.data,
+            "email": email, 
+            "senha": senha,
+            "siap": siap
+        }
+        session["verification_code"] = codigo_verificacao
+        
+
         try:
-            auth = get_firebase_auth()
-            user = auth.create_user_with_email_and_password(email, senha)
-
-            auth.send_email_verification(user['idToken'])
-
-            membro = Membro.query.filter_by(email=email).first()
-
-            if membro and not membro.siap:
-                membro.siap = siap
-
-            if not membro:
-                membro= Membro(
-                    nome=form.nome.data.strip().upper(),
-                    email=email,
-                    tipo="professor",
-                    ativo=True
-                )
-                db.session.add(membro)
-                db.session.flush()
-
-            usuario = Usuario(
-                nome=form.nome.data,
-                email=email,
-                perfil="professor",
-                membro_id=membro.id if membro else None
+            msg = Message(
+                "Código de Verificação - SIRG",
+                recipients=[email]
             )
-            usuario.set_password(senha)
+            msg.body = f"Olá, {form.nome.data}!\n\nSeu código de validação para concluir o seu cadastro no SIRG é: {codigo_verificacao}\n\nPor favor, digite esse código no sistema."
+            mail.send(msg)
 
-            db.session.add(usuario)
-            db.session.commit()
-
-            flash("Utilizador cadastrado com sucesso! Enviamos um link de confirmação para o seu e-mail. Por favor, verifique-o antes de fazer login.", "success")
-            return redirect(url_for("usuarios.login"))
+            flash("Enviamos um código de verificação para o seu e-mail.", "info")
+            return redirect(url_for("usuarios.verificar_codigo"))
 
         except Exception as e:
-            db.session.rollback()
-            flash("Erro ao cadastrar no Firebase. Verifique se o e-mail é válido.", "danger")
-            print(f"Erro do Firebase: {e}")
+            flash("Erro ao enviar o e-mail de verificação. Verifique se o e-mail é válido.", "danger")
+            print(f"Erro ao enviar e-mail (Flask-Mail): {e}")
 
     return render_template("usuarios/cadastrar.html", form=form)
+
+@usuarios.route("/verificar-codigo", methods=["GET", "POST"])
+def verificar_codigo():
+    if "temp_user" not in session or "verification_code" not in session:
+        flash("Nenhum cadastro em andamento. Cadastre-se primeiro.", "warning")
+        return redirect(url_for("usuarios.cadastrar"))
+
+    if request.method == "POST":
+        # Junta os 6 campos individuais de digito enviados pelo formulário HTML
+        digit1 = request.form.get("digit1", "")
+        digit2 = request.form.get("digit2", "")
+        digit3 = request.form.get("digit3", "")
+        digit4 = request.form.get("digit4", "")
+        digit5 = request.form.get("digit5", "")
+        digit6 = request.form.get("digit6", "")
+
+        codigo_digitado = f"{digit1}{digit2}{digit3}{digit4}{digit5}{digit6}".strip()
+        codigo_correto = session.get("verification_code")
+
+        if codigo_digitado == codigo_correto:
+            temp_user = session.get("temp_user")
+            email = temp_user["email"]
+            senha = temp_user["senha"]
+            nome = temp_user["nome"]
+            siap = temp_user["siap"]
+
+            firebase_user = None 
+
+            try:
+                # 1. Cadastrar oficialmente no Firebase
+                auth = get_firebase_auth()
+                firebase_user = auth.create_user_with_email_and_password(email, senha)
+
+                # 2. Registrar na base de dados local
+                membro = Membro.query.filter_by(email=email).first()
+                if not membro and siap:
+                    membro = Membro.query.filter_by(siap=siap).first()
+
+                if membro and siap and not membro.siap:
+                    membro.siap = siap
+
+                usuario = Usuario(
+                    nome=nome,
+                    email=email,
+                    perfil="professor",
+                    membro_id=membro.id if membro else None,
+                    ativo=True
+                )
+                usuario.set_password(senha)
+
+                db.session.add(usuario)
+                db.session.commit()
+
+                # Limpar a sessão temporária
+                session.pop("temp_user", None)
+                session.pop("verification_code", None)
+
+                # Fazer o login automático
+                login_user(usuario)
+
+                flash("E-mail verificado com sucesso! Bem-vindo ao sistema.", "success")
+                return redirect(url_for("dashboard"))
+
+            except Exception as e:
+                # 1. Desfaz qualquer tentativa pela metade no banco local
+                db.session.rollback() 
+                
+                # 2. SE o Firebase chegou a criar o usuário, vamos apagá-lo!
+                if firebase_user:
+                    try:
+                        auth.delete_user_account(firebase_user['idToken'])
+                        print("Rollback: Usuário apagado do Firebase após erro no banco local.")
+                    except Exception as delete_error:
+                        print(f"Erro ao tentar apagar usuário no Firebase: {delete_error}")
+
+                flash("Erro ao salvar cadastro. Tente novamente.", "danger")
+                print(f"Erro do Sistema: {e}")
+                return redirect(url_for("usuarios.cadastrar"))
+        else:
+            flash("Código incorreto. Por favor, verifique e digite novamente.", "danger")
+
+    # A linha que faltava / estava com os espaços errados:
+    return render_template("usuarios/verificar_codigo.html")
+
+@usuarios.route("/reenviar-codigo")
+def reenviar_codigo():
+    if "temp_user" not in session:
+        flash("Nenhum cadastro em andamento.", "warning")
+        return redirect(url_for("usuarios.cadastrar"))
+
+    temp_user = session.get("temp_user")
+    novo_codigo = "".join(str(random.randint(0, 9)) for _ in range(6))
+    session["verification_code"] = novo_codigo
+
+    try:
+        msg = Message(
+            "Novo Código de Verificação - SIRG",
+            recipients=[temp_user["email"]]
+        )
+        msg.body = f"Seu novo código de validação para o SIRG é: {novo_codigo}"
+        mail.send(msg)
+        flash("Um novo código foi enviado para o seu e-mail.", "info")
+    except Exception as e:
+        flash("Erro ao enviar o e-mail. Tente novamente.", "danger")
+        print(f"Erro reenvio: {e}")
+
+    return redirect(url_for("usuarios.verificar_codigo"))    
 
 @usuarios.route('/login/google')
 def login_google():
@@ -145,7 +240,7 @@ def autorizado_google():
         usuario = Usuario(
             nome=nome,
             email=email,
-            perfil='professor', # Perfil padrão que você estava usando
+            perfil='professor', 
             ativo=True
         )
        

@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Verificar Código{% endblock %}
+
+{% block content %}
+
+<style>
+  .verificacao-page {
+    max-width: 500px;
+    margin: 60px auto;
+  }
+
+  .verificacao-card {
+    background: var(--white);
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    box-shadow: 0 12px 34px rgba(15, 23, 42, 0.07);
+    padding: 40px 30px;
+    text-align: center;
+    animation: fadeUp 0.4s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .verificacao-icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+  }
+
+  .verificacao-card h2 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .verificacao-card p {
+    font-size: 14px;
+    color: var(--text-muted);
+    margin-bottom: 28px;
+    line-height: 1.6;
+  }
+
+  .verificacao-card p strong {
+    color: var(--text);
+  }
+
+  /* Grid das caixas de input individuais */
+  .codigo-container {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+
+  .codigo-input {
+    width: 52px;
+    height: 60px;
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+    color: var(--text);
+    background: var(--bg);
+    transition: border-color 0.15s, box-shadow 0.15s, background 0.15s;
+    font-family: 'Sora', sans-serif;
+  }
+
+  .codigo-input:focus {
+    border-color: var(--blue);
+    background: var(--white);
+    box-shadow: 0 0 0 3px rgba(29,78,216,0.08);
+    outline: none;
+  }
+
+  /* Oculta as flechas padrões de input numérico */
+  .codigo-input::-webkit-outer-spin-button,
+  .codigo-input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  .btn-confirmar {
+    width: 100%;
+    min-height: 44px;
+    background: var(--blue);
+    color: #ffffff;
+    border: none;
+    border-radius: 11px;
+    font-family: 'Sora', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(29,78,216,0.22);
+    transition: background 0.15s, transform 0.1s;
+    margin-bottom: 22px;
+  }
+
+  .btn-confirmar:hover {
+    background: #1e40af;
+  }
+
+  .btn-confirmar:active {
+    transform: scale(0.98);
+  }
+
+  .reenviar-texto {
+    font-size: 13px;
+    color: var(--text-muted);
+  }
+
+  .reenviar-link {
+    color: var(--blue);
+    text-decoration: none;
+    font-weight: 600;
+  }
+
+  .reenviar-link:hover {
+    text-decoration: underline;
+  }
+</style>
+
+<div class="verificacao-page">
+  <div class="verificacao-card">
+    <div class="verificacao-icon">✉️</div>
+    <h2>Confirme seu e-mail</h2>
+    <p>Enviamos um código de verificação para:<br><strong>{{ session.get('temp_user', {}).get('email') }}</strong></p>
+
+    <form method="POST" action="{{ url_for('usuarios.verificar_codigo') }}" id="formCodigo">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      
+      <div class="codigo-container">
+        <input type="text" name="digit1" class="codigo-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required autocomplete="off" autofocus>
+        <input type="text" name="digit2" class="codigo-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required autocomplete="off">
+        <input type="text" name="digit3" class="codigo-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required autocomplete="off">
+        <input type="text" name="digit4" class="codigo-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required autocomplete="off">
+        <input type="text" name="digit5" class="codigo-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required autocomplete="off">
+        <input type="text" name="digit6" class="codigo-input" maxlength="1" inputmode="numeric" pattern="[0-9]*" required autocomplete="off">
+      </div>
+
+      <button type="submit" class="btn-confirmar">Confirmar</button>
+    </form>
+
+    <div class="reenviar-texto">
+      Não recebeu o código? 
+      <a href="{{ url_for('usuarios.reenviar_codigo') }}" class="reenviar-link">Enviar novamente</a>
+    </div>
+  </div>
+</div>
+
+<script>
+  const inputs = document.querySelectorAll('.codigo-input');
+
+  inputs.forEach((input, index) => {
+    // 1. Pular automaticamente para a próxima caixinha após digitar
+    input.addEventListener('input', (e) => {
+      const valor = e.target.value;
+
+      // Garante que só aceita números
+      if (isNaN(valor)) {
+        e.target.value = '';
+        return;
+      }
+
+      if (valor !== '') {
+        if (index < inputs.length - 1) {
+          inputs[index + 1].focus();
+        }
+      }
+    });
+
+    // 2. Apagar e voltar automaticamente para a caixinha anterior com o Backspace
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && e.target.value === '') {
+        if (index > 0) {
+          inputs[index - 1].focus();
+        }
+      }
+    });
+
+    // 3. Suporte a colar o código completo de 6 dígitos (Ctrl + V)
+    input.addEventListener('paste', (e) => {
+      e.preventDefault();
+      const dadosColados = e.clipboardData.getData('text').trim();
+
+      // Se for exatamente 6 números, distribui entre as caixas
+      if (dadosColados.length === 6 && /^\d+$/.test(dadosColados)) {
+        inputs.forEach((inp, idx) => {
+          inp.value = dadosColados[idx];
+        });
+        inputs[inputs.length - 1].focus();
+      }
+    });
+  });
+</script>
+
+{% endblock %}
