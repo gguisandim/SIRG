@@ -3,36 +3,6 @@ UNIVERSIDADE FEDERAL DO PARÁ
 NÚCLEO DE ESTUDOS TRANSDISCIPLINARES EM EDUCAÇÃO BÁSICA
 PROGRAMA DE PÓS-GRADUAÇÃO EM CURRÍCULO E GESTÃO DA ESCOLA BÁSICA
 
-Ata da Reunião [TIPO] do Colegiado do Programa de Pós-Graduação em Currículo e Gestão da Escola Básica do NEB/UFPA, realizada no dia [DATA].
+Ata da Reunião [TIPO DA REUNIÃO] do Colegiado do Programa de Pós-Graduação em Currículo e Gestão da Escola Básica do NEB/UFPA, realizada no dia [DATA].
 
-Ao [DATA POR EXTENSO], às [HORÁRIO], no [LOCAL], realizou-se a reunião [TIPO] do Colegiado do Programa de Pós-Graduação em Currículo e Gestão da Escola Básica – PPEB, para apreciação da seguinte pauta:
-
-[PAUTA]
-
-Estiveram presentes:
-
-[PRESENTES]
-
-Justificaram ausência:
-
-[AUSÊNCIAS JUSTIFICADAS]
-
-A reunião foi iniciada pela coordenação do Programa, que deu boas-vindas aos presentes e apresentou os pontos constantes da pauta.
-
-Na sequência, passou-se à apreciação e discussão dos itens previamente estabelecidos:
-
-[DESENVOLVIMENTO DA REUNIÃO]
-
-Durante a discussão, os membros presentes manifestaram-se sobre os pontos abordados, sendo registradas as deliberações, encaminhamentos e aprovações conforme segue:
-
-[DELIBERAÇÕES E ENCAMINHAMENTOS]
-
-Nada mais havendo a tratar, foi encerrada a reunião, e eu, [NOME DO RESPONSÁVEL], lavro a presente ata que, após lida e aprovada, será assinada pelos presentes.
-
-Belém/PA, [DATA].
-
-________________________________________
-[NOME DO RESPONSÁVEL PELA ATA]
-
-________________________________________
-Coordenação do PPEB
+Aos [DIA POR EXTENSO] dias do mês de [MÊS] de [ANO], às [HORÁRIO], na [LOCAL], realizou-se a reunião [TIPO] do Colegiado do PPEB para apreciação da seguinte pauta: [LISTAR PAUTA EM TEXTO CORRIDO, SEPARADA POR PONTO E VÍRGULA]. Iniciada a reunião, a coordenação cumprimentou os presentes. Passou-se à discussão da pauta. Sobre o ponto [NOME DO PRIMEIRO PONTO], a coordenação explicou [RESUMO DA DISCUSSÃO/ANOTAÇÃO]. Após ampla discussão, a solicitação foi aprovada por todos. Em seguida passou-se ao ponto [NOME DO SEGUNDO PONTO]. Sobre esse ponto, [RESUMO DO QUE FOI DISCUTIDO E DECIDIDO]. Vencida a pauta, foram feitos os seguintes informes: [LISTA DE INFORMES EM TEXTO CORRIDO]. Nada mais havendo a tratar, eu, [SEU NOME OU SECRETÁRIO], lavro a presente ata que após lida e aprovada será assinada por todos os presentes.

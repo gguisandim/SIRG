@@ -76,8 +76,10 @@ def cadastrar():
             flash("Já existe um utilizador com esse e-mail no nosso sistema.", "warning")
             return render_template("usuarios/cadastrar.html", form=form)
 
-        codigo_verificacao = "".join(str(random.randint(0,9)) for _ in range (6))
+        # 1. Gerar o código de verificação de 6 dígitos
+        codigo_verificacao = "".join(str(random.randint(0,9)) for _ in range(6))
 
+        # 2. Guardar na sessão temporária
         session["temp_user"] = {
             "nome": form.nome.data,
             "email": email, 
@@ -86,13 +88,45 @@ def cadastrar():
         }
         session["verification_code"] = codigo_verificacao
         
-
+        # 3. Enviar e-mail formatado em HTML
         try:
             msg = Message(
                 "Código de Verificação - SIRG",
                 recipients=[email]
             )
-            msg.body = f"Olá, {form.nome.data}!\n\nSeu código de validação para concluir o seu cadastro no SIRG é: {codigo_verificacao}\n\nPor favor, digite esse código no sistema."
+            # Texto simples (caso o leitor de e-mail do usuário não suporte HTML)
+            msg.body = f"Olá, {form.nome.data}!\n\nSeu código de validação para concluir o seu cadastro no SIRG é: {codigo_verificacao}"
+            
+            # Template HTML Profissional com CSS inline
+            msg.html = f"""
+            <div style="font-family: 'Sora', Arial, sans-serif; max-width: 550px; margin: 30px auto; padding: 40px 30px; border: 1.5px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                <div style="text-align: center; margin-bottom: 25px;">
+                    <h2 style="color: #1d4ed8; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Sistema SIRG</h2>
+                    <p style="font-size: 11px; color: #64748b; margin: 6px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Confirmação de E-mail</p>
+                </div>
+                
+                <div style="height: 1.5px; background-color: #f1f5f9; margin-bottom: 30px;"></div>
+                
+                <p style="font-size: 16px; color: #1e293b; line-height: 1.6; margin-bottom: 16px; font-weight: 500;">Olá, {form.nome.data}!</p>
+                
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 16px;">
+                    Recebemos uma solicitação de cadastro para o seu e-mail no <strong>Sistema Integrado de Registros e Gestão Acadêmica (SIRG)</strong>.
+                </p>
+                
+                <p style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 30px;">
+                    Para concluir a validação de segurança e liberar o seu acesso, utilize o código temporário abaixo:
+                </p>
+                
+                <div style="text-align: center; margin: 30px 0; padding: 24px; background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px;">
+                    <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #1d4ed8; font-family: 'Courier New', monospace; text-shadow: 0 1px 2px rgba(0,0,0,0.05);">{codigo_verificacao}</span>
+                </div>
+                
+                <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 35px; line-height: 1.6;">
+                    Este código é de uso único, temporário e pessoal.<br>
+                    Se você não iniciou este cadastro no sistema, por favor desconsidere este e-mail.
+                </p>
+            </div>
+            """
             mail.send(msg)
 
             flash("Enviamos um código de verificação para o seu e-mail.", "info")
@@ -104,6 +138,7 @@ def cadastrar():
 
     return render_template("usuarios/cadastrar.html", form=form)
 
+
 @usuarios.route("/verificar-codigo", methods=["GET", "POST"])
 def verificar_codigo():
     if "temp_user" not in session or "verification_code" not in session:
@@ -111,7 +146,6 @@ def verificar_codigo():
         return redirect(url_for("usuarios.cadastrar"))
 
     if request.method == "POST":
-        # Junta os 6 campos individuais de digito enviados pelo formulário HTML
         digit1 = request.form.get("digit1", "")
         digit2 = request.form.get("digit2", "")
         digit3 = request.form.get("digit3", "")
@@ -132,11 +166,9 @@ def verificar_codigo():
             firebase_user = None 
 
             try:
-                # 1. Cadastrar oficialmente no Firebase
                 auth = get_firebase_auth()
                 firebase_user = auth.create_user_with_email_and_password(email, senha)
 
-                # 2. Registrar na base de dados local
                 membro = Membro.query.filter_by(email=email).first()
                 if not membro and siap:
                     membro = Membro.query.filter_by(siap=siap).first()
@@ -156,21 +188,17 @@ def verificar_codigo():
                 db.session.add(usuario)
                 db.session.commit()
 
-                # Limpar a sessão temporária
                 session.pop("temp_user", None)
                 session.pop("verification_code", None)
 
-                # Fazer o login automático
                 login_user(usuario)
 
                 flash("E-mail verificado com sucesso! Bem-vindo ao sistema.", "success")
                 return redirect(url_for("dashboard"))
 
             except Exception as e:
-                # 1. Desfaz qualquer tentativa pela metade no banco local
                 db.session.rollback() 
                 
-                # 2. SE o Firebase chegou a criar o usuário, vamos apagá-lo!
                 if firebase_user:
                     try:
                         auth.delete_user_account(firebase_user['idToken'])
@@ -184,7 +212,6 @@ def verificar_codigo():
         else:
             flash("Código incorreto. Por favor, verifique e digite novamente.", "danger")
 
-    # A linha que faltava / estava com os espaços errados:
     return render_template("usuarios/verificar_codigo.html")
 
 @usuarios.route("/reenviar-codigo")
@@ -194,22 +221,55 @@ def reenviar_codigo():
         return redirect(url_for("usuarios.cadastrar"))
 
     temp_user = session.get("temp_user")
+    nome = temp_user["nome"]
+    email = temp_user["email"]
+    
     novo_codigo = "".join(str(random.randint(0, 9)) for _ in range(6))
     session["verification_code"] = novo_codigo
 
     try:
         msg = Message(
             "Novo Código de Verificação - SIRG",
-            recipients=[temp_user["email"]]
+            recipients=[email]
         )
         msg.body = f"Seu novo código de validação para o SIRG é: {novo_codigo}"
+        
+        msg.html = f"""
+        <div style="font-family: 'Sora', Arial, sans-serif; max-width: 550px; margin: 30px auto; padding: 40px 30px; border: 1.5px solid #e2e8f0; border-radius: 16px; background-color: #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+            <div style="text-align: center; margin-bottom: 25px;">
+                <h2 style="color: #1d4ed8; margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.02em;">Sistema SIRG</h2>
+                <p style="font-size: 11px; color: #64748b; margin: 6px 0 0; text-transform: uppercase; letter-spacing: 1px; font-weight: 600;">Novo Código Solicitado</p>
+            </div>
+            
+            <div style="height: 1.5px; background-color: #f1f5f9; margin-bottom: 30px;"></div>
+            
+            <p style="font-size: 16px; color: #1e293b; line-height: 1.6; margin-bottom: 16px; font-weight: 500;">Olá, {nome}!</p>
+            
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 16px;">
+                Você solicitou a geração de um novo código de verificação de acesso para o <strong>SIRG</strong>.
+            </p>
+            
+            <p style="font-size: 14px; color: #475569; line-height: 1.6; margin-bottom: 30px;">
+                Utilize o novo código gerado abaixo na tela do sistema:
+            </p>
+            
+            <div style="text-align: center; margin: 30px 0; padding: 24px; background-color: #f8fafc; border: 1.5px dashed #cbd5e1; border-radius: 12px;">
+                <span style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #1d4ed8; font-family: 'Courier New', monospace; text-shadow: 0 1px 2px rgba(0,0,0,0.05);">{novo_codigo}</span>
+            </div>
+            
+            <p style="font-size: 12px; color: #94a3b8; text-align: center; margin-top: 35px; line-height: 1.6;">
+                Este código é de uso único, temporário e pessoal.<br>
+                Se você não solicitou este reenvio, por favor desconsidere este e-mail.
+            </p>
+        </div>
+        """
         mail.send(msg)
         flash("Um novo código foi enviado para o seu e-mail.", "info")
     except Exception as e:
         flash("Erro ao enviar o e-mail. Tente novamente.", "danger")
         print(f"Erro reenvio: {e}")
 
-    return redirect(url_for("usuarios.verificar_codigo"))    
+    return redirect(url_for("usuarios.verificar_codigo"))
 
 @usuarios.route('/login/google')
 def login_google():

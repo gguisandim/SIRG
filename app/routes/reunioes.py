@@ -20,6 +20,7 @@ import textwrap
 from flask import send_file
 from io import BytesIO
 from docx import Document
+import re
 
 reunioes = Blueprint('reunioes', __name__)
 
@@ -457,24 +458,7 @@ def salvar_ata(id):
     return redirect(url_for("reunioes.detalhes_reuniao", id=reuniao.id))
 
 
-def limpar_cabecalho_ata(texto):
-    linhas = texto.splitlines()
-    resultado = []
-    pulando = True
-
-    for linha in linhas:
-        l = linha.strip()
-
-        if pulando:
-            if l.startswith("Aos ") or l.startswith("Ao "):
-                pulando = False
-                resultado.append(l)
-            continue
-
-        resultado.append(linha)
-
-    return "\n".join(resultado)
-
+# Pode apagar a antiga função 'limpar_cabecalho_ata' que estava aqui.
 
 @reunioes.route("/<int:id>/ata/visualizar")
 @login_required
@@ -482,7 +466,8 @@ def limpar_cabecalho_ata(texto):
 def visualizar_ata(id):
     reuniao = Reuniao.query.get_or_404(id)
 
-    texto_ata = limpar_cabecalho_ata(reuniao.ata or "")
+    # Pegamos o texto puro salvo no banco, sem apagá-lo acidentalmente
+    texto_ata = reuniao.ata or ""
 
     texto_ata = " ".join(
         linha.strip()
@@ -503,6 +488,7 @@ def visualizar_ata(id):
         ata_linhas=ata_linhas
     )
 
+
 @reunioes.route("/<int:id>/ata/word")
 @login_required
 @administrativo_required
@@ -512,11 +498,16 @@ def baixar_ata_word(id):
     from docx import Document
     from docx.shared import Pt, Inches
     from docx.enum.text import WD_ALIGN_PARAGRAPH
+    # Importação crucial para criar a quebra de seção contínua
+    from docx.enum.section import WD_SECTION_START
+    from docx.oxml import OxmlElement
+    from docx.oxml.ns import qn
 
     reuniao = Reuniao.query.get_or_404(id)
 
     doc = Document()
 
+    # --- SEÇÃO 1: CABEÇALHO E TÍTULO (SEM NUMERAÇÃO) ---
     section = doc.sections[0]
     section.top_margin = Inches(0.7)
     section.bottom_margin = Inches(0.7)
@@ -552,26 +543,46 @@ def baixar_ata_word(id):
 
     # Título da ata
     titulo = doc.add_paragraph()
-    titulo.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    titulo.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
     titulo.paragraph_format.left_indent = Inches(3.1)
 
-    run_titulo = titulo.add_run(
-        f"Ata da {reuniao.titulo} do Colegiado do\n"
-        "Programa de Pós-Graduação em Currículo e\n"
-        "Gestão da Escola Básica do NEB/UFPA,\n"
-        f"realizada no dia {reuniao.data.strftime('%d/%m/%Y')}"
-    )
+    # Limpamos o título cadastrado para evitar duplicações como "Colegiado do Colegiado do"
+    titulo_reuniao = reuniao.titulo.strip()
+    
+    # Se o título no banco já tiver "do Colegiado", ajustamos a frase
+    if "Colegiado" in titulo_reuniao:
+        texto_titulo = f"Ata da {titulo_reuniao} do\nPrograma de Pós-Graduação em Currículo e\nGestão da Escola Básica do NEB/UFPA,\nrealizada no dia {reuniao.data.strftime('%d/%m/%Y')}"
+    else:
+        texto_titulo = f"Ata da {titulo_reuniao} do Colegiado do\nPrograma de Pós-Graduação em Currículo e\nGestão da Escola Básica do NEB/UFPA,\nrealizada no dia {reuniao.data.strftime('%d/%m/%Y')}"
+
+    run_titulo = titulo.add_run(texto_titulo)
     run_titulo.bold = True
     run_titulo.font.name = "Times New Roman"
     run_titulo.font.size = Pt(12)
 
     doc.add_paragraph("")
 
-    # Corpo da ata sem repetir cabeçalho
-    texto_ata = limpar_cabecalho_ata(reuniao.ata or "")
+    # --- SEÇÃO 2: CORPO DA ATA (COM NUMERAÇÃO A PARTIR DAQUI) ---
+    # Criamos uma quebra de seção DO TIPO CONTÍNUA (não pula página)
+    section_texto = doc.add_section(WD_SECTION_START.CONTINUOUS)
+    section_texto.top_margin = Inches(0.7)
+    section_texto.bottom_margin = Inches(0.7)
+    section_texto.left_margin = Inches(0.85)
+    section_texto.right_margin = Inches(0.85)
+
+    # Ativamos a numeração de linhas EXCLUSIVAMENTE nesta segunda seção
+    sectPr = section_texto._sectPr
+    lnNumType = OxmlElement('w:lnNumType')
+    lnNumType.set(qn('w:countBy'), '1')
+    lnNumType.set(qn('w:restart'), 'continuous')
+    sectPr.append(lnNumType)
+    # -------------------------------------------------------------
+
+    # Inserção do Texto da Ata na nova seção
+    texto_ata = reuniao.ata or ""
 
     if not texto_ata.strip():
-        texto_ata = "Ata não cadastrada."
+        texto_ata = "Ata não encontrada no banco de dados. Lembre-se: Após gerar o texto com a IA, você deve clicar no botão laranja 'Salvar Ata' antes de baixar o documento."
 
     paragrafos = [
         linha.strip()
@@ -582,6 +593,8 @@ def baixar_ata_word(id):
     if not paragrafos:
         paragrafos = [texto_ata.strip()]
 
+    import re  # Importação necessária para ler os códigos de negrito
+
     for paragrafo in paragrafos:
         p = doc.add_paragraph()
         p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
@@ -589,9 +602,18 @@ def baixar_ata_word(id):
         p.paragraph_format.line_spacing = 1.15
         p.paragraph_format.space_after = Pt(6)
 
-        run = p.add_run(paragrafo)
-        run.font.name = "Times New Roman"
-        run.font.size = Pt(12)
+        # Quebra o texto identificando as partes em negrito (entre **)
+        partes = re.split(r'\*\*(.*?)\*\*', paragrafo)
+
+        for i, parte in enumerate(partes):
+            if parte:
+                run = p.add_run(parte)
+                run.font.name = "Times New Roman"
+                run.font.size = Pt(12)
+                
+                # Se o índice for ímpar, significa que o texto estava dentro dos asteriscos (**)
+                if i % 2 == 1:
+                    run.bold = True
 
     arquivo = BytesIO()
     doc.save(arquivo)
@@ -603,7 +625,7 @@ def baixar_ata_word(id):
         download_name=f"ata_reuniao_{reuniao.id}.docx",
         mimetype="application/vnd.openxmlformats-officedocument.wordprocessingml.document"
     )
-@reunioes.route("/<int:id>/encerrar-justificativas", methods=["POST"])
+    
 @login_required
 @administrativo_required
 def encerrar_justificativas(id):
@@ -718,3 +740,15 @@ def remover_frequencia_reuniao(reuniao_id, frequencia_id):
 
     flash("Participante removido desta reunião.", "success")
     return redirect(url_for("reunioes.detalhes_reuniao", id=reuniao_id))
+
+@reunioes.route("/<int:id>/encerrar-justificativas", methods=["POST"])
+@login_required
+@administrativo_required
+def encerrar_justificativas(id):
+    reuniao = Reuniao.query.get_or_404(id)
+
+    reuniao.justificativas_encerradas = True
+    db.session.commit()
+
+    flash("Justificativas encerradas com sucesso.", "success")
+    return redirect(url_for("reunioes.detalhes_reuniao", id=reuniao.id))

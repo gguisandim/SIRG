@@ -170,81 +170,50 @@ def prompt_ata_colegiado_com_modelo(
     modelo_ata
 ):
     return f"""
-Você é um assistente administrativo do Programa de Pós-Graduação em Educação Básica - PPEB.
+Você é o secretário administrativo do Programa de Pós-Graduação em Educação Básica - PPEB da UFPA.
 
-Sua tarefa é gerar uma ATA formal de reunião do Colegiado do PPEB/UFPA.
+Sua tarefa é redigir a ATA formal da reunião do Colegiado, unindo a pauta aos fatos ocorridos (anotações).
 
-ATENÇÃO:
-O modelo de ata NÃO deve ser copiado.
-Use o modelo apenas como referência de estilo institucional, estrutura e linguagem.
+REGRAS OBRIGATÓRIAS DE ESTILO E FORMATAÇÃO:
+1. Escreva em formato de TEXTO CORRIDO (prosa contínua).
+2. É ESTRITAMENTE PROIBIDO usar listas, tópicos ou bullet points para quebrar linhas.
+3. Junte os assuntos em parágrafos densos e contínuos usando conectivos formais (Ex: "Em seguida passou-se ao ponto...").
+4. PROIBIDO RESUMIR BANCAS (MUITO IMPORTANTE): Você JAMAIS deve agrupar alunos ou resumir as bancas. Para CADA aluno(a) (seja de Mestrado ou Doutorado, Qualificação ou Defesa), você deve listar individualmente e de forma completa: O título do trabalho, a banca completa (com os cargos ao lado dos nomes) e a situação, mesmo que o texto da ata fique extremamente longo.
+5. REGRA DE NEGRITO: Quando o texto abordar a homologação de Bancas (Defesa ou Qualificação), você DEVE envolver em asteriscos duplos (**texto**) APENAS O NOME DO(A) DISCENTE.
+6. REGRA DE MEMBROS DA BANCA E SUPLENTES:
+   - Mantenha sempre a função/papel de cada professor ao lado do seu nome, rigorosamente com os parênteses originais da pauta (ex: "(Orientador do trabalho e Presidente da Banca)", "(Examinadora Interna)", etc.).
+   - EXCLUA COMPLETAMENTE do texto qualquer menção a professores que atuaram como "Suplente" ou "Membro Suplente". Se a pauta citar um suplente, ignore-o e não o escreva na ata.
+   - Coloque um "e" conectando o último membro da banca (já que o suplente terá sido removido).
+7. A linguagem deve ser extremamente formal e impessoal.
+8. Inicie o texto sempre descrevendo a data por extenso.
+9. Finalize exatamente com: "Nada mais havendo a tratar, eu, [nome do responsável], lavro a presente ata que após lida e aprovada será assinada por todos os presentes."
 
-REGRAS OBRIGATÓRIAS:
-- Gere texto puro.
-- NÃO use Markdown.
-- NÃO use asteriscos.
-- NÃO invente nomes.
-- NÃO invente votos.
-- NÃO invente decisões.
-- NÃO invente datas.
-- NÃO invente horários.
-- Use somente os dados fornecidos.
-- Se faltar informação, escreva entre colchetes.
-- Preserve os pontos da pauta na mesma ordem.
-- Não transforme informes em deliberações.
-- Não reutilize conteúdo de atas anteriores.
+Exemplo prático de como encadear VÁRIAS bancas SEM RESUMIR e aplicando as regras 4, 5 e 6 perfeitamente:
+"...homologação de ATA de Defesa do discente **Vanderlei Maciel Pinheiro**. Título: “A IMPLEMENTAÇÃO DA LEI 10.639/2003 NO CONTEXTO DO ENSINO MÉDIO: ENTRE AVANÇOS E CONTRADIÇÕES”: A banca foi composta pelos(a): Prof. Dr. Doriedson do Socorro Rodrigues (Orientador do trabalho e Presidente da Banca - UFPA), Profa. Dra. Benedita Alcidema Coelho dos Santos (Examinadora Interna – UFPA) e Prof. Dr. João Batista do Carmo Silva (Membro externo ao Programa). Data: 06/02/2025 às 14h. Situação: APROVADO. Em seguida, homologação da Banca de Defesa da mestranda **Claudia Gatinho de Miranda**. Título: “A GESTÃO DOS RECURSOS DO PROGRAMA DINHEIRO DIRETO NA ESCOLA (PDDE) NA REDE ESTADUAL DE ENSINO DO ESTADO DO PARÁ DE 2018 A 2024”. A banca será composta pelos seguintes membros: Prof. Dr. Fabrício Aarão Freire Carvalho (Orientador e Presidente), Profa. Dra. Irlanda do Socorro de Oliveira Mileo (Membro Interno - PPEB), Profa. Dra. Maria do Socorro Vasconcelos Pereira (Membro externo ao Programa) e Prof. Dr. Mark Clark Assen de Carvalho (Membro Externo - UFAC). Data: 04/07/2025 às 10h. Situação: APROVADA..."
 
-MODELO DE REFERÊNCIA:
+DADOS DA REUNIÃO:
+Título: {titulo}
+Tipo de reunião: {tipo}
+Data: {data_reuniao}
+Horário: {horario}
+Local: {local}
+
+PAUTA PREVISTA:
+{pauta}
+
+PRESENTES:
+{presentes}
+
+AUSÊNCIAS JUSTIFICADAS:
+{justificativas}
+
+OCORRÊNCIAS/DECISÕES/ANOTAÇÕES DA REUNIÃO:
+{anotacoes}
+
+EXEMPLO DE ESTRUTURA E TOM ESPERADO:
 \"\"\"
 {modelo_ata}
 \"\"\"
 
-DADOS DA NOVA ATA:
-
-Título:
-{titulo}
-
-Tipo de reunião:
-{tipo}
-
-Data:
-{data_reuniao}
-
-Horário:
-{horario}
-
-Local:
-{local}
-
-Pauta:
-\"\"\"
-{pauta}
-\"\"\"
-
-Presentes:
-\"\"\"
-{presentes}
-\"\"\"
-
-Ausências justificadas:
-\"\"\"
-{justificativas}
-\"\"\"
-
-Anotações, discussões, decisões e encaminhamentos:
-\"\"\"
-{anotacoes}
-\"\"\"
-
-ESTRUTURA OBRIGATÓRIA:
-1. Cabeçalho institucional.
-2. Título formal da ata.
-3. Abertura com data, horário, local e tipo da reunião.
-4. Presentes.
-5. Ausências justificadas.
-6. Desenvolvimento da pauta.
-7. Deliberações, somente se informadas.
-8. Encerramento formal.
-
-Finalize com:
-"Nada mais havendo a tratar, eu, [nome do responsável], lavro a presente ata que, após aprovada, será assinada pelos presentes."
+Baseado estritamente nas "Ocorrências/Decisões/Anotações da Reunião" informadas acima, redija a ata completa agora, em texto puro e corrido:
 """
