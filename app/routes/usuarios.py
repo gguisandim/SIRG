@@ -317,7 +317,7 @@ def autorizado_google():
                 tipo='professor',
                 ativo=True
             )
-            dp.session.add(novo_membro)
+            db.session.add(novo_membro)
 
         db.session.commit()
         
