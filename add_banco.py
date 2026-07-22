@@ -107,7 +107,16 @@ def popular_professores():
 
 
 if __name__ == "__main__":
+    
     app = create_app()
-
     with app.app_context():
+        print("0. Limpando o banco de dados antigo da nuvem...")
+        db.drop_all()  # <--- ESTA LINHA VAI APAGAR AS TABELAS ERRADAS
+
+        print("1. Conectando à Nuvem e recriando as tabelas com o novo tamanho...")
+        db.create_all()
+        
+        print("2. Tabelas criadas com sucesso! Adicionando professores...")
         popular_professores()
+        
+        print("3. Banco de dados inicializado e populado com sucesso!")
